@@ -1,0 +1,182 @@
+<template>
+  <v-dialog v-model="isShown" :width="1200">
+    <v-card>
+      <v-toolbar class="select-none" color="warning">
+        <v-toolbar-title class="text-white">
+          {{ t("logsCrashes.title") }}
+        </v-toolbar-title>
+        <v-spacer />
+        <v-btn icon="close" @click="hide" />
+
+        <template #extension>
+          <v-tabs v-model="data.tab" color="white" slider-color="yellow">
+            <v-tab :value="0" :disabled="data.loadingList" @click="goLog">
+              {{ t("logsCrashes.logs") }}
+            </v-tab>
+            <v-tab :value="1" :disabled="data.loadingList" @click="goCrash">
+              {{ t("logsCrashes.crashes") }}
+            </v-tab>
+            <v-tab :value="2" :disabled="data.loadingList" @click="goFailures">
+              {{ t("logsCrashes.failures") }}
+              <v-chip
+                v-if="data.failures.length > 0"
+                size="x-small"
+                class="ml-2"
+                color="white"
+                variant="tonal"
+                label
+              >
+                {{ data.failures.length }}
+              </v-chip>
+            </v-tab>
+          </v-tabs>
+        </template>
+      </v-toolbar>
+      <v-tabs-window v-model="data.tab" class="bg-transparent">
+        <v-tabs-window-item :value="0">
+          <TabItem
+            log
+            :visible="data.tab === 0 && isShown"
+            :files="data.logs"
+            :refreshing="data.loadingList"
+            :get-file-content="_getLogContent"
+            :remove-file="removeLog"
+            :show-file="_showLog"
+          />
+        </v-tabs-window-item>
+        <v-tabs-window-item :value="1">
+          <TabItem
+            :visible="data.tab === 1 && isShown"
+            :files="data.crashes"
+            :refreshing="data.loadingList"
+            :get-file-content="_getCrashReportContent"
+            :remove-file="removeCrashReport"
+            :show-file="_showCrashReport"
+          />
+        </v-tabs-window-item>
+        <v-tabs-window-item :value="2">
+          <TabItem
+            :visible="data.tab === 2 && isShown"
+            :files="data.failures"
+            :refreshing="data.loadingList"
+            :get-file-content="_getLogContent"
+            :remove-file="removeFailure"
+            :show-file="_showLog"
+          />
+        </v-tabs-window-item>
+      </v-tabs-window>
+    </v-card>
+  </v-dialog>
+</template>
+
+<script lang="ts" setup>
+import { useService } from "@/composables";
+import { kInstance } from "@/composables/instance";
+import { injection } from "@/util/inject";
+import { InstanceLogServiceKey } from "@xmcl/runtime-api";
+import { useDialog } from "../composables/dialog";
+import TabItem from "./HomeLogDialogTab.vue";
+
+const {
+  listLogs,
+  listLaunchFailures,
+  listCrashReports,
+  removeLog: rmLog,
+  removeCrashReport: rmCrash,
+  getCrashReportContent,
+  getLogContent,
+  showLog,
+  showCrash: showCrashReport,
+} = useService(InstanceLogServiceKey);
+const { isShown, hide } = useDialog("log");
+const { t } = useI18n();
+
+const { path } = injection(kInstance);
+
+const data = reactive({
+  tab: null as any as number,
+  loadingContent: false,
+  loadingList: false,
+  logs: [] as string[],
+  crashes: [] as string[],
+  failures: [] as string[],
+});
+const _getLogContent = (name: string) => getLogContent(path.value, name);
+const _getCrashReportContent = (name: string) =>
+  getCrashReportContent(path.value, name);
+const _showLog = (name: string) => showLog(path.value, name);
+const _showCrashReport = (name: string) => showCrashReport(path.value, name);
+
+function loadLogs() {
+  data.loadingList = true;
+  listLogs(path.value)
+    .then((l) => {
+      data.logs = l;
+    })
+    .finally(() => {
+      data.loadingList = false;
+    });
+}
+function loadCrashes() {
+  data.loadingList = true;
+  listCrashReports(path.value)
+    .then((l) => {
+      data.crashes = l;
+    })
+    .finally(() => {
+      data.loadingList = false;
+    });
+}
+function loadFailures() {
+  data.loadingList = true;
+  listLaunchFailures(path.value)
+    .then((l) => {
+      data.failures = l;
+    })
+    .finally(() => {
+      data.loadingList = false;
+    });
+}
+async function removeLog(name: string) {
+  await rmLog(path.value, name);
+  loadLogs();
+}
+async function removeCrashReport(name: string) {
+  await rmCrash(path.value, name);
+  loadCrashes();
+}
+async function removeFailure(name: string) {
+  // Failures live in the same `logs/` folder as regular logs, so the
+  // existing removeLog endpoint handles them.
+  await rmLog(path.value, name);
+  loadFailures();
+}
+watch(isShown, (s) => {
+  if (s) {
+    data.tab = 0;
+    loadLogs();
+    // Eagerly load the failure list so the badge count on the tab is
+    // accurate even before the user clicks the tab.
+    loadFailures();
+  } else {
+    data.logs = [];
+    data.crashes = [];
+    data.failures = [];
+  }
+});
+function goLog() {
+  data.tab = 0;
+
+  loadLogs();
+}
+function goCrash() {
+  data.tab = 1;
+  loadCrashes();
+}
+function goFailures() {
+  data.tab = 2;
+  loadFailures();
+}
+</script>
+
+<style></style>

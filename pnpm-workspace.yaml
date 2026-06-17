@@ -1,0 +1,12 @@
+packages:
+  - 'packages/**'
+  - 'xmcl-electron-app'
+  - 'xmcl-runtime-api'
+  - 'xmcl-runtime'
+  - 'xmcl-keystone-ui'
+  # NOTE: 'e2e' is intentionally NOT in this list. It's an opt-in sub-project
+  # so the default `pnpm install` doesn't pull Playwright (~14 MB) for the
+  # 95% of contributors who never run end-to-end tests. Install it on demand
+  # with `pnpm --prefix=e2e install`. See e2e/README.md.
+  - '.github/actions/*'
+enableGlobalVirtualStore: true

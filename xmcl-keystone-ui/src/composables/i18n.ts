@@ -1,0 +1,74 @@
+import { Settings } from '@xmcl/runtime-api'
+import { Ref } from 'vue'
+import { useLocale } from 'vuetify'
+import { useI18nSearchFlights } from './flights'
+
+const locales = import.meta.glob('../../locales/*.yaml')
+
+export function useI18nSync(state: Ref<Settings | undefined>) {
+  const { locale, setLocaleMessage } = useI18n()
+  const vuetifyLocale = useLocale()
+  const applyLocale = (newValue: string) => {
+    if (newValue === 'zh-CN') {
+      vuetifyLocale.current.value = 'zhHans'
+    } else if (newValue === 'ru') {
+      vuetifyLocale.current.value = 'ru'
+    } else {
+      vuetifyLocale.current.value = 'en'
+    }
+    if (!locales['../../locales/' + newValue + '.yaml']) {
+      newValue = 'en'
+    }
+    locales['../../locales/' + newValue + '.yaml']().then((message: any) => {
+      setLocaleMessage(newValue, message.default)
+      locale.value = newValue
+    })
+  }
+  watch(
+    () => state.value?.locale,
+    (newValue, oldValue) => {
+      if (newValue) applyLocale(newValue)
+    },
+    { immediate: true },
+  )
+}
+
+
+export function useAutoI18nEnabled() {
+  const i18nSearch = useI18nSearchFlights()
+  const { locale } = useI18n()
+  if (i18nSearch?.includes(locale.value)) {
+    return true
+  }
+  return false
+}
+
+export function useAutoI18nCommunityContent(allowLocale: string[] = []) {
+  const { locale } = useI18n()
+
+  async function getContent(type: 'modrinth' | 'curseforge', id: string | number) {
+    if (!allowLocale.includes(locale.value)) {
+      return ''
+    }
+
+    const url = new URL('https://api.xmcl.app/translation')
+    url.searchParams.append('type', type)
+    url.searchParams.append('id', id.toString())
+    const response = await fetch(url, {
+      headers: {
+        'Accept-Language': locale.value,
+      },
+      cache: 'force-cache',
+    })
+
+    if (!response.ok) {
+      throw new Error(`Fail to get translation for ${type} ${id}`)
+    }
+
+    return await response.text()
+  }
+
+  return {
+    getContent,
+  }
+}
