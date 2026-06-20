@@ -144,6 +144,6 @@ const onLogin = () => {
   userMenu.show('login')
 }
 
-const openDiscord = () => window.open('https://discord.gg/W5XVwYY7GQ', 'browser')
-const openGithub = () => window.open('https://github.com/Voxelum/x-minecraft-launcher', 'browser')
+const openDiscord = () => window.open('https://discord.gg/', 'browser')
+const openGithub = () => window.open('https://limyrx.xyz', 'browser')
 </script>

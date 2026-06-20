@@ -24,7 +24,7 @@ For Java issues or missing vanilla game libraries, you should provide direct rem
 
 If the crash is caused by mods, you should analyze the logs to determine which mods may be responsible for the errors and notify me.
 
-If the specific cause cannot be determined, please inform me that I should contact the developers. Join discord: https://discord.gg/W5XVwYY7GQ
+If the specific cause cannot be determined, please inform me that I should contact the developers. Join discord: https://discord.gg/
 
 I prefer you to response my with locale ${localeCode}.
 

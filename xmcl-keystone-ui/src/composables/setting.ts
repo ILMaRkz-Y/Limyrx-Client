@@ -36,10 +36,15 @@ export function useUpdateSettings() {
   }
 
   const checkingUpdate = ref(false)
+  const updateError = ref('')
   async function check() {
     checkingUpdate.value = true
+    updateError.value = ''
     try {
       await checkUpdate()
+    } catch (e) {
+      updateError.value = e instanceof Error ? e.message : String(e)
+      console.error('[Update check failed]', e)
     } finally {
       checkingUpdate.value = false
     }
@@ -55,6 +60,7 @@ export function useUpdateSettings() {
     checkingUpdate,
     downloadingUpdate,
     updateInfo,
+    updateError,
   }
 }
 export const kSettingsState: InjectionKey<ReturnType<typeof useSettingsState>> = Symbol('Settings')

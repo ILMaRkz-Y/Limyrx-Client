@@ -272,7 +272,7 @@ export class ClientUser extends User {
 
     return (
       await this.client.request('SET_ACTIVITY', {
-        pid: (pid ?? process) ? (process.pid ?? 0) : 0,
+        pid: pid ?? process.pid ?? 0,
         activity: formattedAcitivity,
       })
     ).data
@@ -284,7 +284,7 @@ export class ClientUser extends User {
    * @param pid - the application's process id
    */
   async clearActivity(pid?: number): Promise<void> {
-    await this.client.request('SET_ACTIVITY', { pid: (pid ?? process) ? (process.pid ?? 0) : 0 })
+    await this.client.request('SET_ACTIVITY', { pid: pid ?? process.pid ?? 0 })
   }
 
   // #region Undocumented

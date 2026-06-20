@@ -160,54 +160,66 @@ export class IPCTransport extends Transport {
       IPC_OPCODE.HANDSHAKE,
     )
 
-    this.socket.on('readable', () => {
-      let data = this.socket?.read() as Buffer | undefined
-      if (!data) return
+    // Accumulation buffer for partial/incomplete IPC frames
+    let buffer = Buffer.alloc(0)
+
+    this.socket.on('data', (chunk) => {
       this.client.emit(
         'debug',
-        `SERVER => CLIENT | ${data
+        `SERVER => CLIENT | ${chunk
           .toString('hex')
           .match(/.{1,2}/g)
           ?.join(' ')
           .toUpperCase()}`,
       )
 
-      do {
-        const chunk = this.socket?.read() as Buffer | undefined
-        if (!chunk) break
-        this.client.emit(
-          'debug',
-          `SERVER => CLIENT | ${chunk
-            .toString('hex')
-            .match(/.{1,2}/g)
-            ?.join(' ')
-            .toUpperCase()}`,
-        )
-        data = Buffer.concat([data, chunk])
-      } while (true)
+      // Append new data to the accumulation buffer
+      buffer = Buffer.concat([buffer, chunk])
 
-      const op = data.readUInt32LE(0)
-      const length = data.readUInt32LE(4)
-      const parsedData = JSON.parse(data.subarray(8, length + 8).toString())
+      // Process as many complete frames as possible
+      while (buffer.length >= 8) {
+        const length = buffer.readUInt32LE(4)
+        const frameSize = 8 + length
 
-      this.client.emit('debug', `SERVER => CLIENT | OPCODE.${IPC_OPCODE[op]} |`, parsedData)
-
-      switch (op) {
-        case IPC_OPCODE.FRAME: {
-          if (!data) break
-
-          this.emit('message', parsedData)
+        if (buffer.length < frameSize) {
+          // Wait for more data
           break
         }
-        case IPC_OPCODE.CLOSE: {
-          this.emit('close', parsedData)
-          break
+
+        const op = buffer.readUInt32LE(0)
+        let parsedData: any = undefined
+
+        if (length > 0) {
+          try {
+            parsedData = JSON.parse(buffer.subarray(8, frameSize).toString())
+          } catch (e) {
+            this.client.emit('debug', 'Failed to parse IPC frame', e)
+            // Skip malformed frame
+            buffer = buffer.subarray(frameSize)
+            continue
+          }
         }
-        case IPC_OPCODE.PING: {
-          this.send(parsedData, IPC_OPCODE.PONG)
-          this.emit('ping')
-          break
+
+        this.client.emit('debug', `SERVER => CLIENT | OPCODE.${IPC_OPCODE[op]} |`, parsedData)
+
+        switch (op) {
+          case IPC_OPCODE.FRAME: {
+            this.emit('message', parsedData)
+            break
+          }
+          case IPC_OPCODE.CLOSE: {
+            this.emit('close', parsedData)
+            break
+          }
+          case IPC_OPCODE.PING: {
+            this.send(parsedData, IPC_OPCODE.PONG)
+            this.emit('ping')
+            break
+          }
         }
+
+        // Remove the processed frame from the buffer
+        buffer = buffer.subarray(frameSize)
       }
     })
 

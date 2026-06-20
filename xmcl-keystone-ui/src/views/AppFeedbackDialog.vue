@@ -62,7 +62,7 @@
               color="primary"
               class="text-none justify-start"
               prepend-icon="chat"
-              href="https://discord.gg/UznGWc5ywF"
+              href="https://discord.gg/"
               target="_blank"
               rel="noopener noreferrer"
             >

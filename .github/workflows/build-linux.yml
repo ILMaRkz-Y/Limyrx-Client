@@ -1,0 +1,105 @@
+name: Build Linux & macOS
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., v0.56.8)'
+        required: true
+
+jobs:
+  build-linux:
+    name: Build Linux (AppImage + tar.xz)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10.33.3
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build renderer
+        run: pnpm build:renderer
+
+      - name: Build Linux
+        working-directory: xmcl-electron-app
+        env:
+          NODE_ENV: production
+          RELEASE: true
+        run: npx tsx build.ts
+
+      - name: Upload Linux artifacts to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: xmcl-electron-app/build/output/xmcl-*-linux-x64.*
+          file_glob: true
+          tag: ${{ github.event.release.tag_name }}
+          overwrite: true
+
+      - name: Upload Linux ASAR
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: xmcl-electron-app/build/output/app-*-linux.*
+          file_glob: true
+          tag: ${{ github.event.release.tag_name }}
+          overwrite: true
+
+  build-mac:
+    name: Build macOS (DMG)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10.33.3
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build renderer
+        run: pnpm build:renderer
+
+      - name: Build macOS
+        working-directory: xmcl-electron-app
+        env:
+          NODE_ENV: production
+          RELEASE: true
+        run: npx tsx build.ts
+
+      - name: Upload macOS artifacts to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: xmcl-electron-app/build/output/xmcl-*-mac.*
+          file_glob: true
+          tag: ${{ github.event.release.tag_name }}
+          overwrite: true
+
+      - name: Upload macOS ASAR
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: xmcl-electron-app/build/output/app-*-mac.*
+          file_glob: true
+          tag: ${{ github.event.release.tag_name }}
+          overwrite: true

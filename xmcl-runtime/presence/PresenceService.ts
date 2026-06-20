@@ -105,11 +105,14 @@ export class PresenceService extends AbstractService implements IPresenceService
         return
       }
     }
-    const param = this.current
+    // Create a fresh activity object every time to avoid race conditions
+    // and only set startTimestamp if it hasn't been set yet
+    if (!this.current.startTimestamp) {
+      this.current.startTimestamp = Date.now()
+    }
     this.current.largeImageKey = 'dark_512'
-    this.current.startTimestamp = Date.now()
     this.current.details = activity
-    await this.discord.user?.setActivity(param).catch((e: any) => {
+    await this.discord.user?.setActivity({ ...this.current }).catch((e: any) => {
       this.warn('Fail to set discord presence. %o', e)
     })
   }

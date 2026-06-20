@@ -32,13 +32,7 @@ export const config = {
     to: '.',
     filter: 'package.json',
   }],
-  extraResources: [
-    {
-      from: 'assets/system-mods',
-      to: 'system-mods',
-      filter: ['*.jar'],
-    },
-  ],
+  extraResources: [],
   artifactName: 'xmcl-${version}-${platform}-${arch}.${ext}',
   appx: {
     displayName: 'Limyrx Launcher',
