@@ -1,13 +1,12 @@
 name: Build Linux & macOS
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to build (e.g., v0.56.8)'
+        description: 'Version to build (e.g., 0.56.8)'
         required: true
+        default: '0.56.8'
 
 jobs:
   build-linux:
@@ -26,6 +25,12 @@ jobs:
         with:
           version: 10.33.3
 
+      - name: Update version in package.json
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          echo "Building version: $VERSION"
+          # We just use the version from repo's package.json, no need to modify
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -39,23 +44,16 @@ jobs:
           RELEASE: true
         run: npx tsx build.ts
 
-      - name: Upload Linux artifacts to release
-        uses: svenstaro/upload-release-action@v2
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: xmcl-electron-app/build/output/xmcl-*-linux-x64.*
-          file_glob: true
-          tag: ${{ github.event.release.tag_name }}
-          overwrite: true
-
-      - name: Upload Linux ASAR
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: xmcl-electron-app/build/output/app-*-linux.*
-          file_glob: true
-          tag: ${{ github.event.release.tag_name }}
-          overwrite: true
+          name: linux-build-${{ github.event.inputs.version }}
+          path: |
+            xmcl-electron-app/build/output/xmcl-*-linux*
+            xmcl-electron-app/build/output/app-*-linux*
+            xmcl-electron-app/build/output/*.AppImage
+            xmcl-electron-app/build/output/*.tar.xz
+          if-no-files-found: warn
 
   build-mac:
     name: Build macOS (DMG)
@@ -86,20 +84,12 @@ jobs:
           RELEASE: true
         run: npx tsx build.ts
 
-      - name: Upload macOS artifacts to release
-        uses: svenstaro/upload-release-action@v2
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: xmcl-electron-app/build/output/xmcl-*-mac.*
-          file_glob: true
-          tag: ${{ github.event.release.tag_name }}
-          overwrite: true
-
-      - name: Upload macOS ASAR
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: xmcl-electron-app/build/output/app-*-mac.*
-          file_glob: true
-          tag: ${{ github.event.release.tag_name }}
-          overwrite: true
+          name: macos-build-${{ github.event.inputs.version }}
+          path: |
+            xmcl-electron-app/build/output/xmcl-*-mac*
+            xmcl-electron-app/build/output/app-*-mac*
+            xmcl-electron-app/build/output/*.dmg
+          if-no-files-found: warn
