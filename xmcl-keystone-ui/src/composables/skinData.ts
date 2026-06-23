@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { fbGet, fbSet, fbRemove } from './firebase'
+import { supabaseSelect, supabaseInsert, supabaseUpdate, supabaseDelete, TABLES } from './supabase'
 
 export interface SkinEntry {
   id: string
@@ -16,21 +16,22 @@ let _skinPollTimer: ReturnType<typeof setInterval> | null = null
 
 async function fetchSkins() {
   try {
-    const val = await fbGet<Record<string, SkinEntry>>('skins')
-    if (val && typeof val === 'object') {
-      const arr: SkinEntry[] = []
-      for (const key of Object.keys(val)) {
-        const item = val[key]
-        if (item && item.id) {
-          arr.push(item)
-        }
-      }
-      arr.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      _skinList.value = arr
-    } else {
-      _skinList.value = []
-    }
-  } catch {}
+    const data = await supabaseSelect<any[]>(TABLES.SKINS, {
+      order: 'date',
+      ascending: false,
+    })
+    _skinList.value = (data ?? []).map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      model: row.model,
+      skinUrl: row.skin_url,
+      capeUrl: row.cape_url ?? undefined,
+      date: row.date,
+    }))
+  } catch (e) {
+    console.warn('[skinData] fetchSkins failed', e)
+    _skinList.value = []
+  }
 }
 
 function startPolling() {
@@ -53,44 +54,81 @@ export function useSkinData() {
   }
 
   async function addSkin(item: Omit<SkinEntry, 'id' | 'date'>) {
-    const skin: SkinEntry = {
-      ...item,
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-    }
     try {
-      await fbSet('skins/' + skin.id, skin)
+      await supabaseInsert(TABLES.SKINS, {
+        name: item.name,
+        model: item.model,
+        skin_url: item.skinUrl,
+        cape_url: item.capeUrl || null,
+        date: new Date().toISOString(),
+      })
       await fetchSkins()
-    } catch {}
-    return skin
+    } catch (e) {
+      console.warn('[skinData] addSkin failed', e)
+    }
   }
 
   async function updateSkin(id: string, data: Partial<SkinEntry>) {
     try {
-      const existing = _skinList.value.find((s) => s.id === id)
-      if (existing) {
-        await fbSet('skins/' + id, { ...existing, ...data })
-        await fetchSkins()
-      }
-    } catch {}
+      const updates: Record<string, any> = { updated_at: new Date().toISOString() }
+      if (data.name !== undefined) updates.name = data.name
+      if (data.model !== undefined) updates.model = data.model
+      if (data.skinUrl !== undefined) updates.skin_url = data.skinUrl
+      if (data.capeUrl !== undefined) updates.cape_url = data.capeUrl || null
+
+      await supabaseUpdate(TABLES.SKINS, { id }, updates)
+      await fetchSkins()
+    } catch (e) {
+      console.warn('[skinData] updateSkin failed', e)
+    }
   }
 
   async function removeSkin(id: string) {
     try {
-      await fbRemove('skins/' + id)
+      await supabaseDelete(TABLES.SKINS, { id })
       await fetchSkins()
-    } catch {}
+    } catch (e) {
+      console.warn('[skinData] removeSkin failed', e)
+    }
   }
 
   async function saveSkins(skins: SkinEntry[]) {
     try {
-      const data: Record<string, SkinEntry> = {}
-      for (const item of skins) {
-        data[item.id] = item
+      // Upsert each skin; delete removed ones
+      const oldIds = new Set(_skinList.value.map(i => i.id))
+      const newIds = new Set(skins.filter(i => i.id).map(i => i.id))
+
+      // Remove skins no longer in the list
+      for (const item of _skinList.value) {
+        if (!newIds.has(item.id)) {
+          try { await supabaseDelete(TABLES.SKINS, { id: item.id }) } catch {}
+        }
       }
-      await fbSet('skins', data)
-      _skinList.value = skins
-    } catch {}
+
+      for (const item of skins) {
+        if (item.id && oldIds.has(item.id)) {
+          await supabaseUpdate(TABLES.SKINS, { id: item.id }, {
+            name: item.name,
+            model: item.model,
+            skin_url: item.skinUrl,
+            cape_url: item.capeUrl || null,
+            updated_at: new Date().toISOString(),
+          })
+        } else {
+          await supabaseInsert(TABLES.SKINS, {
+            name: item.name,
+            model: item.model,
+            skin_url: item.skinUrl,
+            cape_url: item.capeUrl || null,
+            date: item.date || new Date().toISOString(),
+          })
+        }
+      }
+
+      await fetchSkins()
+    } catch (e) {
+      console.warn('[skinData] saveSkins failed', e)
+    }
   }
 
   return {

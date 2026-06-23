@@ -118,16 +118,16 @@ function reloadAll() {
 
 function ensureMyProfile() {
   const id = myProfileId.value
-    if (!id || profiles[id]) return
-    profiles[id] = {
-      profileId: id,
-      displayName: myDisplayName.value,
-      status: myStatus.value,
-      lastSeen: now(),
-      createdAt: now(),
-    }
-    persistAll()
+  if (!id || profiles[id]) return
+  profiles[id] = {
+    profileId: id,
+    displayName: myDisplayName.value,
+    status: myStatus.value,
+    lastSeen: now(),
+    createdAt: now(),
   }
+  persistAll()
+}
 
   function setStatus(status: LimyrxStatus) {
     myStatus.value = status

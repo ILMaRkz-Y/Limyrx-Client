@@ -1,7 +1,6 @@
 ﻿import { createRouter, createWebHashHistory } from 'vue-router'
 
 // Lazy-loaded route components for code-splitting
-const AdminPanel = () => import('@/views/AdminPanel.vue')
 const BaseSetting = () => import('@/views/BaseSetting.vue')
 const BaseSettingActions = () => import('@/views/BaseSettingActions.vue')
 const BaseSettingExtension = () => import('@/views/BaseSettingExtension.vue')
@@ -157,10 +156,6 @@ export const router = createRouter({
     {
       path: '/servers',
       component: Servers,
-    },
-    {
-      path: '/admin',
-      component: AdminPanel,
     },
   ],
 })

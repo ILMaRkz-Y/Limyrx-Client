@@ -1,5 +1,5 @@
 import { computed, ref, onUnmounted } from 'vue'
-import { fbGet, fbSet, fbRemove } from './firebase'
+import { supabaseSelect, supabaseInsert, supabaseUpdate, supabaseDelete, TABLES } from './supabase'
 
 export type AdminPermission = 'view' | 'edit' | 'owner'
 
@@ -21,21 +21,20 @@ const OWNER_FALLBACK = 'ilmarkz_'
 
 async function fetchAdminUsers() {
   try {
-    const val = await fbGet<Record<string, AdminUser>>('adminUsers')
-    if (val && typeof val === 'object') {
-      const arr: AdminUser[] = []
-      for (const key of Object.keys(val)) {
-        const item = val[key]
-        if (item && item.name) {
-          arr.push({ ...item, id: key })
-        }
-      }
-      _adminUsers.value = arr
-    } else {
-      _adminUsers.value = []
-    }
-  } catch {
-    // silently fail
+    const data = await supabaseSelect<any[]>(TABLES.ADMIN_USERS, {
+      order: 'name',
+      ascending: true,
+    })
+    _adminUsers.value = (data ?? []).map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      permission: row.permission,
+      addedAt: new Date(row.added_at).getTime(),
+      addedBy: row.added_by,
+    }))
+  } catch (e) {
+    console.warn('[adminPermissions] fetchAdminUsers failed', e)
+    _adminUsers.value = []
   }
 }
 
@@ -74,8 +73,8 @@ export function useAdminPermissions() {
   }
 
   /**
-   * Fallback: if Firebase is empty, the hardcoded owner still gets access.
-   * Once Firebase data loads, Firebase admins take precedence.
+   * Fallback: if Supabase is empty, the hardcoded owner still gets access.
+   * Once data loads, Supabase admins take precedence.
    */
   function hasFallbackAccess(): boolean {
     return _currentUserName.value === OWNER_FALLBACK
@@ -85,7 +84,6 @@ export function useAdminPermissions() {
     if (!_currentUserName.value) return false
     const user = getUser(_currentUserName.value)
     if (user) return user.permission === 'owner'
-    // Fallback: ilmarkz_ is always owner
     return hasFallbackAccess()
   })
 
@@ -93,7 +91,6 @@ export function useAdminPermissions() {
     if (!_currentUserName.value) return false
     const user = getUser(_currentUserName.value)
     if (user) return user.permission === 'edit' || user.permission === 'owner'
-    // Fallback: ilmarkz_ can always edit
     return hasFallbackAccess()
   })
 
@@ -101,7 +98,6 @@ export function useAdminPermissions() {
     if (!_currentUserName.value) return false
     const user = getUser(_currentUserName.value)
     if (user) return true
-    // Fallback: ilmarkz_ is always admin
     return hasFallbackAccess()
   })
 
@@ -120,17 +116,18 @@ export function useAdminPermissions() {
     if (existing) return `"${name}" is already an admin (${existing.permission})`
 
     try {
-      const newUser: Omit<AdminUser, 'id'> = {
+      await supabaseInsert(TABLES.ADMIN_USERS, {
         name: normalized,
         permission,
-        addedAt: Date.now(),
-        addedBy: _currentUserName.value || 'unknown',
-      }
-      // Use the name as the key for easy lookup
-      await fbSet(`adminUsers/${normalized}`, newUser)
+        added_by: _currentUserName.value || 'unknown',
+      })
       await fetchAdminUsers()
       return null
-    } catch {
+    } catch (e: any) {
+      console.warn('[adminPermissions] addAdmin failed', e)
+      if (e.message?.includes('23505') || e.message?.includes('duplicate')) {
+        return `"${name}" is already an admin`
+      }
       return 'Failed to add admin'
     }
   }
@@ -139,17 +136,17 @@ export function useAdminPermissions() {
     const normalized = name.trim().toLowerCase()
     if (!normalized) return 'Enter a valid username'
 
-    // Prevent removing yourself from owner role
     if (normalized === _currentUserName.value) {
       const user = getUser(normalized)
       if (user?.permission === 'owner') return 'Cannot remove yourself as owner'
     }
 
     try {
-      await fbRemove(`adminUsers/${normalized}`)
+      await supabaseDelete(TABLES.ADMIN_USERS, { name: normalized })
       await fetchAdminUsers()
       return null
-    } catch {
+    } catch (e) {
+      console.warn('[adminPermissions] removeAdmin failed', e)
       return 'Failed to remove admin'
     }
   }
@@ -158,7 +155,6 @@ export function useAdminPermissions() {
     const normalized = name.trim().toLowerCase()
     if (!normalized) return 'Enter a valid username'
 
-    // Prevent demoting yourself from owner
     if (normalized === _currentUserName.value) {
       const user = getUser(normalized)
       if (user?.permission === 'owner' && permission !== 'owner') {
@@ -167,42 +163,34 @@ export function useAdminPermissions() {
     }
 
     try {
-      await fbSet(`adminUsers/${normalized}/permission`, permission)
+      await supabaseUpdate(TABLES.ADMIN_USERS, { name: normalized }, { permission })
       await fetchAdminUsers()
       return null
-    } catch {
+    } catch (e) {
+      console.warn('[adminPermissions] updatePermission failed', e)
       return 'Failed to update permission'
     }
   }
 
-  /** Auto-create the fallback owner in Firebase if no admin users exist yet */
   async function seedOwnerIfNeeded(): Promise<boolean> {
-    if (_adminUsers.value.length > 0) return false // already has admins
+    if (_adminUsers.value.length > 0) return false
     if (!_currentUserName.value) return false
-    
-    // Only seed if the current user is the fallback owner or if Firebase is empty
-    const hasData = _adminUsers.value.length > 0
-    if (hasData) return false
-    
+
     try {
-      const ownerName = _currentUserName.value
-      // Check if there's ANY data in adminUsers
-      const existing = await fbGet<Record<string, any>>('adminUsers')
-      if (existing && Object.keys(existing).length > 0) {
-        // Data exists but none matched our user - do nothing
+      const existing = await supabaseSelect<any[]>(TABLES.ADMIN_USERS, { limit: 1 })
+      if (existing && existing.length > 0) {
         return false
       }
-      
-      // Seed: create the current user as owner
-      await fbSet(`adminUsers/${ownerName}`, {
-        name: ownerName,
+
+      await supabaseInsert(TABLES.ADMIN_USERS, {
+        name: _currentUserName.value,
         permission: 'owner',
-        addedAt: Date.now(),
-        addedBy: 'system',
+        added_by: 'system',
       })
       await fetchAdminUsers()
       return true
-    } catch {
+    } catch (e) {
+      console.warn('[adminPermissions] seedOwnerIfNeeded failed', e)
       return false
     }
   }
@@ -212,7 +200,6 @@ export function useAdminPermissions() {
     await seedOwnerIfNeeded()
   }
 
-  // Auto-seed on first fetch
   setTimeout(() => seedOwnerIfNeeded(), 2000)
 
   return {

@@ -1,5 +1,5 @@
 import { onUnmounted, ref } from 'vue'
-import { fbGet, fbSet, fbRemove } from './firebase'
+import { supabaseUpsert, supabaseSelect, supabaseDelete, TABLES } from './supabase'
 
 const STALE_MS = 120_000
 
@@ -30,29 +30,37 @@ export function useOnlinePlayers() {
 
   async function heartbeat() {
     try {
-      await fbSet(`presence/${instanceId}`, { username: currentUser || 'anonymous', lastSeen: Date.now() })
-    } catch {
-      // silently fail
+      await supabaseUpsert(TABLES.PRESENCE, {
+        instance_id: instanceId,
+        username: currentUser || 'anonymous',
+        last_seen: new Date().toISOString(),
+      }, 'instance_id')
+    } catch (e) {
+      console.warn('[presence] heartbeat failed', e)
     }
   }
 
   async function pollCount() {
     try {
-      const data = await fbGet<Record<string, { username: string; lastSeen: number }>>('presence')
-      const now = Date.now()
-      const list: OnlinePlayer[] = []
-      if (data) {
-        for (const key of Object.keys(data)) {
-          if (now - data[key].lastSeen < STALE_MS) {
-            list.push({ id: key, username: data[key].username, lastSeen: data[key].lastSeen })
-          }
-        }
-      }
-      list.sort((a, b) => b.lastSeen - a.lastSeen)
+      const cutoff = new Date(Date.now() - STALE_MS).toISOString()
+      const data = await supabaseSelect<any[]>(TABLES.PRESENCE, {
+        select: 'id,instance_id,username,last_seen',
+        filters: { last_seen: `gte.${cutoff}` },
+        order: 'last_seen',
+        ascending: false,
+      })
+
+      const list: OnlinePlayer[] = (data ?? []).map((row: any) => ({
+        id: row.instance_id,
+        username: row.username,
+        lastSeen: new Date(row.last_seen).getTime(),
+      }))
+
       online.value = list.length > 0
       playerCount.value = list.length
       players.value = list
-    } catch {
+    } catch (e) {
+      console.warn('[presence] poll failed', e)
       online.value = false
       playerCount.value = 0
       players.value = []
@@ -63,9 +71,9 @@ export function useOnlinePlayers() {
 
   async function removePresence() {
     try {
-      await fbRemove(`presence/${instanceId}`)
-    } catch {
-      // silently fail
+      await supabaseDelete(TABLES.PRESENCE, { instance_id: instanceId })
+    } catch (e) {
+      console.warn('[presence] remove failed', e)
     }
   }
 

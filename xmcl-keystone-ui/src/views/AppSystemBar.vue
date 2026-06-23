@@ -44,14 +44,6 @@
       can-hide-text
     />
 
-    <AppSystemBarBadge
-      v-if="isAdmin"
-      icon="admin_panel_settings"
-      text="Admin"
-      can-hide-text
-      @click="goAdmin"
-    />
-
     <div class="notification-wrapper">
       <AppSystemBarBadge
         icon="notifications_none"
@@ -189,7 +181,6 @@ import { useTaskCount } from '../composables/task'
 import { injection } from '@/util/inject'
 import { useOnlinePlayers } from '@/composables/onlinePlayers'
 import { useAdminData, type AdminNotification } from '@/composables/adminData'
-import { useAdminPermissions } from '@/composables/adminPermissions'
 import { kUserContext } from '@/composables/user'
 import { useWindowStyle } from '@/composables/windowStyle'
 import { kTutorial } from '@/composables/tutorial'
@@ -248,18 +239,8 @@ const onBack = () => {
 const { gameProfile, userProfile } = injection(kUserContext)
 const { online: playerOnline, playerCount, start: startPresence } = useOnlinePlayers()
 
-watch(() => gameProfile.value?.name, (name) => {
-  if (name) startPresence(name)
-}, { immediate: true })
 
-const { isAdmin, setCurrentUser } = useAdminPermissions()
-watch(() => gameProfile.value?.name, (name) => {
-  if (name) setCurrentUser(name)
-}, { immediate: true })
 
-function goAdmin() {
-  router.push('/admin')
-}
 
 const adminData = useAdminData()
 const showNotifications = ref(false)
