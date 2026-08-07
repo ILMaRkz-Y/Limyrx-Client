@@ -5,11 +5,15 @@
     "1.8.9": {
       "minecraft": "1.8.9",
       "forge": "11.15.1.2318",
-      "base": "https://cdn.jsdelivr.net/gh/ILMaRkz-Y/Limyrx-Launcher@main/limyrx-client/1.8.9",
+      "base": "https://cdn.jsdelivr.net/gh/ILMaRkz-Y/Limyrx-Client@main/limyrx-client/1.8.9",
       "files": [
         {
-          "path": "README.txt",
-          "sha1": "c76ba6e998129183f3ee145bfa13286088bbd5cd"
+          "path": "mods/limyrx-1.0.0.jar",
+          "sha1": "06da5197c92720e576ae7d74dc71f335aef5e610"
+        },
+        {
+          "path": "mods/discord-rpc-java-1.0.4.jar",
+          "sha1": "571f66e9d98d99c72bb9a2f63d6282292efca6c0"
         }
       ]
     }
