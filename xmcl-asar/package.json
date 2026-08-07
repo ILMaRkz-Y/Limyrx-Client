@@ -1,0 +1,23 @@
+{
+  "name": "@xmcl/app",
+  "version": "0.0.0",
+  "description": "Prebuilt app.asar bundle of Limyrx Client",
+  "electron": "0.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ILMaRkz-Y/Limyrx-Client.git",
+    "directory": "xmcl-asar"
+  },
+  "homepage": "https://client.limyrx.online",
+  "files": [
+    "app.asar",
+    "app.asar.sha256",
+    "icon.ico",
+    "icon.icns"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}
