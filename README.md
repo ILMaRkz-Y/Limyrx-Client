@@ -243,4 +243,5 @@ publish of the `@xmcl/app-*` asar bundles.
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+Limyrx Client is distributed under a custom non-commercial license. Redistribution, commercial use
+and modification are restricted — see [LICENSE.md](LICENSE.md) for the full terms.

@@ -1,8 +1,8 @@
-LIMYRX Launcher – Custom Non-Commercial License
+Limyrx Client – Custom Non-Commercial License
 Copyright (c) 2026 Yassir (LIMYRX)
 All rights reserved.
 
-Permission is hereby granted to any individual to use and share the unmodified version of the LIMYRX Launcher software (the "Software"), subject to the following conditions:
+Permission is hereby granted to any individual to use and share the unmodified version of the Limyrx Client software (the "Software"), subject to the following conditions:
 
 1. NON-COMMERCIAL USE ONLY
 The Software may not be used, sold, sublicensed, monetized, or distributed as part of any commercial product, service, or platform.
@@ -17,7 +17,7 @@ Modification of the Software is prohibited unless explicit permission is granted
 You may reuse portions of the source code for non-commercial purposes provided that:
    * Clear credit is given to the original author (Yassir / LIMYRX)
    * The use of the code is disclosed
-   * A visible code comment acknowledging LIMYRX Launcher is included
+   * A visible code comment acknowledging Limyrx Client is included
 
 5. ATTRIBUTION
 Any redistribution of the unmodified Software must include:
