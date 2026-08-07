@@ -2,8 +2,7 @@
 
 A modern, feature-rich Minecraft launcher and game client built with Electron and Vue 3.
 
-Limyrx Client is a fork of [XMCL (X Minecraft Launcher)](https://github.com/Voxelum/x-minecraft-launcher),
-rebranded and extended with a curated, manifest-driven game client platform. It manages game
+Limyrx Client is a curated, manifest-driven Minecraft client and launcher platform. It manages game
 instances, mod loaders, modpacks, resource packs, shader packs, worlds and accounts — everything you
 need to play and mod Minecraft, in one fast, modern application.
 
