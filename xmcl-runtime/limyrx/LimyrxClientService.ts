@@ -12,14 +12,20 @@ import { Inject, LauncherApp, LauncherAppKey } from '~/app'
 import { AbstractService, ExposeServiceKey } from '~/service'
 
 /**
- * Primary and fallback locations of the Limyrx Client manifest.
+ * Primary and fallback locations of the Limyrx Client manifest and content.
  *
  * The manifest describes every client version and the files each one needs.
  * It is hosted on the Limyrx-Client GitHub repo and served through the
  * jsDelivr CDN (raw.githubusercontent is the fallback).
+ *
+ * Content files (the mod jars) are fetched from raw.githubusercontent first:
+ * jsDelivr caps packages at 50 MB and currently refuses this repo (its
+ * tracked payload exceeds the cap), so the CDN is only a mirror.
  */
 const CDN_MANIFEST_URL = 'https://cdn.jsdelivr.net/gh/ILMaRkz-Y/Limyrx-Client@main/limyrx-client/manifest.json'
 const RAW_MANIFEST_URL = 'https://raw.githubusercontent.com/ILMaRkz-Y/Limyrx-Client/main/limyrx-client/manifest.json'
+const RAW_CONTENT_BASE = 'https://raw.githubusercontent.com/ILMaRkz-Y/Limyrx-Client/main/limyrx-client'
+const CDN_CONTENT_BASE = 'https://cdn.jsdelivr.net/gh/ILMaRkz-Y/Limyrx-Client@main/limyrx-client'
 
 /**
  * The Limyrx Client platform: a curated Forge-based client whose mods and
@@ -83,16 +89,32 @@ export class LimyrxClientService extends AbstractService implements ILimyrxClien
     }
     let installed = 0
     for (const file of version.files) {
+      // Download order is enforced here (not trusted to the manifest) so a
+      // stale cached manifest can never point downloads at a dead source:
+      // raw GitHub first, then the CDN mirror, then whatever the manifest
+      // declares as its base.
+      const urls = Array.from(new Set([
+        `${RAW_CONTENT_BASE}/${version.minecraft}/${file.path}`,
+        `${CDN_CONTENT_BASE}/${version.minecraft}/${file.path}`,
+        `${version.base}/${file.path}`,
+      ]))
       const dest = join(instancePath, file.path)
-      const url = `${version.base}/${file.path}`
-      let resp: Response
-      try {
-        resp = await this.app.fetch(url)
-      } catch (e) {
-        throw new AnyError('LimyrxFileDownloadError', `Failed to download ${url}`, { cause: e })
+      let resp: Response | undefined
+      let lastError: unknown
+      for (const url of urls) {
+        try {
+          const r = await this.app.fetch(url)
+          if (r.ok) {
+            resp = r
+            break
+          }
+          lastError = new AnyError('LimyrxFileDownloadError', `Failed to download ${url}: HTTP ${r.status}`)
+        } catch (e) {
+          lastError = e
+        }
       }
-      if (!resp.ok) {
-        throw new AnyError('LimyrxFileDownloadError', `Failed to download ${url}: HTTP ${resp.status}`)
+      if (!resp) {
+        throw new AnyError('LimyrxFileDownloadError', `Failed to download ${file.path} from any source`, { cause: lastError })
       }
       const buf = Buffer.from(await resp.arrayBuffer())
       const sha1 = createHash('sha1').update(buf).digest('hex')
