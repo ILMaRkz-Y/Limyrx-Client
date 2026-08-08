@@ -10,6 +10,7 @@
       <template v-else>
         <div class="flex flex-col gap-4">
           <BaseSettingGeneral />
+          <BaseSettingLimyrxClient v-if="isLimyrx" />
           <BaseSettingVersions />
           <BaseSettingResolution />
         </div>
@@ -92,6 +93,7 @@ import { injection } from '@/util/inject'
 import { useService } from '@/composables'
 import { InstanceModsServiceKey } from '@xmcl/runtime-api'
 import { InstanceEditInjectionKey, useInstanceEdit } from '../composables/instanceEdit'
+import { isLimyrxClientInstance } from '@/composables/limyrxClient'
 import BaseSettingGeneral from './BaseSettingGeneral.vue'
 import BaseSettingBedrockVersions from './BaseSettingBedrockVersions.vue'
 import BaseSettingJava from './BaseSettingJava.vue'
@@ -99,6 +101,7 @@ import BaseSettingLaunch from './BaseSettingLaunch.vue'
 import BaseSettingSync from './BaseSettingSync.vue'
 import BaseSettingVersions from './BaseSettingVersions.vue'
 import BaseSettingResolution from './BaseSettingResolution.vue'
+import BaseSettingLimyrxClient from './BaseSettingLimyrxClient.vue'
 import { templateRef } from '@vueuse/core'
 import { kCompact } from '@/composables/scrollTop'
 import { useQuery } from '@/composables/query'
@@ -115,6 +118,7 @@ import { BaseSettingModUpgradeDialogKey } from '@/composables/instanceUpdate'
 
 const { isServer, name, instance, runtime } = injection(kInstance)
 const isBedrock = computed(() => instance.value.edition === 'bedrock')
+const isLimyrx = computed(() => isLimyrxClientInstance(instance.value))
 const { edit: _edit } = injection(kInstances)
 const edit = useInstanceEdit(instance, _edit)
 const { t } = useI18n()

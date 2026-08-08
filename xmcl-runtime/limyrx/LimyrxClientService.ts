@@ -1,12 +1,17 @@
 import { createHash } from 'crypto'
-import { ensureDir, writeFile } from 'fs-extra'
+import { ensureDir, pathExists, readFile, writeFile } from 'fs-extra'
 import { dirname, join } from 'path'
 import { AnyError } from '@xmcl/utils'
 import {
   LimyrxClientService as ILimyrxClientService,
   LimyrxClientServiceKey,
+  LimyrxContentUpdate,
+  LimyrxFileUpdate,
   LimyrxInstallResult,
   LimyrxManifest,
+  LimyrxManifestFile,
+  LimyrxManifestVersion,
+  LimyrxUpdateResult,
 } from '@xmcl/runtime-api'
 import { Inject, LauncherApp, LauncherAppKey } from '~/app'
 import { AbstractService, ExposeServiceKey } from '~/service'
@@ -60,6 +65,14 @@ export class LimyrxClientService extends AbstractService implements ILimyrxClien
     return this.manifestPromise
   }
 
+  async refreshManifest(): Promise<LimyrxManifest> {
+    // Drop the cache so a manifest pushed since the launcher started (or a
+    // failed attempt) is re-fetched. getManifest() re-populates the cache.
+    this.manifest = undefined
+    this.manifestPromise = undefined
+    return this.getManifest()
+  }
+
   private async fetchManifest(): Promise<LimyrxManifest> {
     for (const url of [CDN_MANIFEST_URL, RAW_MANIFEST_URL]) {
       try {
@@ -78,7 +91,11 @@ export class LimyrxClientService extends AbstractService implements ILimyrxClien
     throw new AnyError('LimyrxManifestFetchError', 'Cannot fetch the Limyrx Client manifest from any source')
   }
 
-  async installContent(instancePath: string, minecraft: string): Promise<LimyrxInstallResult> {
+  /**
+   * Resolve the manifest entry for a Minecraft version, or throw the
+   * standard not-found error.
+   */
+  private async getVersion(minecraft: string): Promise<LimyrxManifestVersion> {
     const manifest = await this.getManifest()
     const version = manifest.versions[minecraft]
     if (!version) {
@@ -87,49 +104,138 @@ export class LimyrxClientService extends AbstractService implements ILimyrxClien
         `No Limyrx Client content for Minecraft ${minecraft}`,
       )
     }
+    return version
+  }
+
+  async installContent(instancePath: string, minecraft: string): Promise<LimyrxInstallResult> {
+    const version = await this.getVersion(minecraft)
     let installed = 0
     for (const file of version.files) {
-      // Download order: an explicit per-file URL (GitHub release asset) is
-      // tried first, then raw GitHub, the CDN mirror and finally whatever the
-      // manifest declares as its base. Ordering is enforced here (not trusted
-      // to the manifest) so a stale cached manifest can never point downloads
-      // at a dead source.
-      const urls = Array.from(new Set([
-        ...(file.url ? [file.url] : []),
-        `${RAW_CONTENT_BASE}/${version.minecraft}/${file.path}`,
-        `${CDN_CONTENT_BASE}/${version.minecraft}/${file.path}`,
-        `${version.base}/${file.path}`,
-      ]))
-      const dest = join(instancePath, file.path)
-      let resp: Response | undefined
-      let lastError: unknown
-      for (const url of urls) {
-        try {
-          const r = await this.app.fetch(url)
-          if (r.ok) {
-            resp = r
-            break
-          }
-          lastError = new AnyError('LimyrxFileDownloadError', `Failed to download ${url}: HTTP ${r.status}`)
-        } catch (e) {
-          lastError = e
-        }
-      }
-      if (!resp) {
-        throw new AnyError('LimyrxFileDownloadError', `Failed to download ${file.path} from any source`, { cause: lastError })
-      }
-      const buf = Buffer.from(await resp.arrayBuffer())
-      const sha1 = createHash('sha1').update(buf).digest('hex')
-      if (sha1 !== file.sha1) {
-        throw new AnyError(
-          'LimyrxFileHashMismatchError',
-          `Checksum mismatch for ${file.path}: expected ${file.sha1}, got ${sha1}`,
-        )
-      }
-      await ensureDir(dirname(dest))
-      await writeFile(dest, buf)
+      await this.downloadAndVerify(instancePath, file, version)
       installed += 1
     }
     return { installed, minecraft }
+  }
+
+  async checkContentUpdate(instancePath: string, minecraft: string): Promise<LimyrxContentUpdate> {
+    // Always hit the network: an update check exists to notice content that
+    // the host pushed after this launcher process started.
+    const manifest = await this.refreshManifest()
+    const version = manifest.versions[minecraft]
+    if (!version) {
+      throw new AnyError(
+        'LimyrxVersionNotFoundError',
+        `No Limyrx Client content for Minecraft ${minecraft}`,
+      )
+    }
+    const files: LimyrxFileUpdate[] = []
+    for (const file of version.files) {
+      const dest = join(instancePath, file.path)
+      const update: LimyrxFileUpdate = {
+        path: file.path,
+        expected: file.sha1,
+        status: 'missing',
+      }
+      try {
+        if (await pathExists(dest)) {
+          const actual = await this.sha1Of(dest)
+          update.actual = actual
+          update.status = actual === file.sha1 ? 'up-to-date' : 'changed'
+        }
+      } catch (e) {
+        // Unreadable file (permissions, locked…) — treat as changed so an
+        // update retries it rather than skipping it silently.
+        this.logger.warn(`[Limyrx] Cannot hash ${dest} for update check`)
+        this.logger.warn(e)
+        update.status = 'changed'
+      }
+      files.push(update)
+    }
+    const changed = files.filter((f) => f.status === 'changed').length
+    const missing = files.filter((f) => f.status === 'missing').length
+    const upToDate = files.filter((f) => f.status === 'up-to-date').length
+    return {
+      minecraft,
+      files,
+      changed,
+      missing,
+      upToDate,
+      hasUpdate: changed + missing > 0,
+    }
+  }
+
+  async updateContent(instancePath: string, minecraft: string): Promise<LimyrxUpdateResult> {
+    const update = await this.checkContentUpdate(instancePath, minecraft)
+    const version = await this.getVersion(minecraft)
+    let installed = 0
+    let skipped = 0
+    for (const file of version.files) {
+      const status = update.files.find((f) => f.path === file.path)?.status
+      if (status === 'up-to-date') {
+        skipped += 1
+        continue
+      }
+      await this.downloadAndVerify(instancePath, file, version)
+      installed += 1
+    }
+    return { installed, skipped, minecraft }
+  }
+
+  /**
+   * Compute the SHA-1 hex digest of a file on disk.
+   */
+  private async sha1Of(path: string): Promise<string> {
+    const buf = await readFile(path)
+    return createHash('sha1').update(buf).digest('hex')
+  }
+
+  /**
+   * Download a single manifest file into the instance, trying each source in
+   * order and verifying the SHA-1 checksum before writing it to disk.
+   */
+  private async downloadAndVerify(
+    instancePath: string,
+    file: LimyrxManifestFile,
+    version: LimyrxManifestVersion,
+  ): Promise<void> {
+    // Download order: an explicit per-file URL (GitHub release asset) is
+    // tried first, then raw GitHub, the CDN mirror and finally whatever the
+    // manifest declares as its base. Ordering is enforced here (not trusted
+    // to the manifest) so a stale cached manifest can never point downloads
+    // at a dead source.
+    const urls = Array.from(new Set([
+      ...(file.url ? [file.url] : []),
+      `${RAW_CONTENT_BASE}/${version.minecraft}/${file.path}`,
+      `${CDN_CONTENT_BASE}/${version.minecraft}/${file.path}`,
+      `${version.base}/${file.path}`,
+    ]))
+    const dest = join(instancePath, file.path)
+    let resp: Response | undefined
+    let lastError: unknown
+    for (const url of urls) {
+      try {
+        const r = await this.app.fetch(url)
+        if (r.ok) {
+          resp = r
+          break
+        }
+        lastError = new AnyError('LimyrxFileDownloadError', `Failed to download ${url}: HTTP ${r.status}`)
+      } catch (e) {
+        lastError = e
+      }
+    }
+    if (!resp) {
+      throw new AnyError('LimyrxFileDownloadError', `Failed to download ${file.path} from any source`, { cause: lastError })
+    }
+    const buf = Buffer.from(await resp.arrayBuffer())
+    const sha1 = createHash('sha1').update(buf).digest('hex')
+    if (sha1 !== file.sha1) {
+      throw new AnyError(
+        'LimyrxFileHashMismatchError',
+        `Checksum mismatch for ${file.path}: expected ${file.sha1}, got ${sha1}`,
+      )
+    }
+    await ensureDir(dirname(dest))
+    await writeFile(dest, buf)
   }
 }

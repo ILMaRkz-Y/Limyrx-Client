@@ -430,6 +430,20 @@ limyrxClient:
   installTitle: Limyrx Client Installed
   installBody: Installed the Limyrx Client content for version {version}.
   installFailed: Limyrx Client Install Failed
+  title: Limyrx Client
+  checkUpdates: Check for Updates
+  checkFailed: Could not check for Limyrx Client updates
+  checking: Checking for updates…
+  upToDate: Your Limyrx Client content is up to date.
+  updatesAvailable: '{changed} file(s) changed, {missing} file(s) missing'
+  notChecked: Check the hosted manifest to see whether this instance has new content.
+  update: Update
+  updating: Updating…
+  updateTitle: Limyrx Client Updated
+  updateBody: Updated {count} file(s) for version {version}.
+  updateFailed: Limyrx Client Update Failed
+  error: Could not check for Limyrx Client updates. Check your connection and try again.
+  moreFiles: '{count} more file(s)'
 gameType:
   adventure: Adventure Mode
   creative: Creative Mode

@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-keystone-ui/` and the
 
 If the anchor you need is not here, add a `data-testid="…"` attribute to the corresponding Vue component, then re-run `pnpm gen:testids`.
 
-**Total anchors:** 159 (in 274 Vue files)
+**Total anchors:** 164 (in 275 Vue files)
 
 | Test ID | Defined in |
 |---|---|
@@ -37,6 +37,11 @@ If the anchor you need is not here, add a `data-testid="…"` attribute to the c
 | `base-setting-bedrock-refresh` | [`limyrx-keystone-ui/src/views/BaseSettingBedrockVersions.vue#L10`](../limyrx-keystone-ui/src/views/BaseSettingBedrockVersions.vue#L10) |
 | `base-setting-bedrock-versions` | [`limyrx-keystone-ui/src/views/BaseSettingBedrockVersions.vue#L3`](../limyrx-keystone-ui/src/views/BaseSettingBedrockVersions.vue#L3) |
 | `base-setting-folder-action` | [`limyrx-keystone-ui/src/views/BaseSettingActions.vue#L26`](../limyrx-keystone-ui/src/views/BaseSettingActions.vue#L26) |
+| `base-setting-limyrx-card` | [`limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L5`](../limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L5) |
+| `base-setting-limyrx-check` | [`limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L23`](../limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L23) |
+| `base-setting-limyrx-file-list` | [`limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L53`](../limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L53) |
+| `base-setting-limyrx-status` | [`limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L16`](../limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L16) |
+| `base-setting-limyrx-update` | [`limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L34`](../limyrx-keystone-ui/src/views/BaseSettingLimyrxClient.vue#L34) |
 | `base-setting-log-action` | [`limyrx-keystone-ui/src/views/BaseSettingActions.vue#L16`](../limyrx-keystone-ui/src/views/BaseSettingActions.vue#L16) |
 | `base-setting-server-tab` | [`limyrx-keystone-ui/src/views/BaseSettingExtension.vue#L58`](../limyrx-keystone-ui/src/views/BaseSettingExtension.vue#L58) |
 | `bind-server-upstream` | [`limyrx-keystone-ui/src/views/BaseSettingServer.vue#L29`](../limyrx-keystone-ui/src/views/BaseSettingServer.vue#L29) |
