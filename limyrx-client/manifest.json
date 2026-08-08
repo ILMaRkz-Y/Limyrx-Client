@@ -9,11 +9,13 @@
       "files": [
         {
           "path": "mods/limyrx-1.0.0.jar",
-          "sha1": "06da5197c92720e576ae7d74dc71f335aef5e610"
+          "sha1": "06da5197c92720e576ae7d74dc71f335aef5e610",
+          "url": "https://github.com/ILMaRkz-Y/Limyrx-Client/releases/download/v0.56.8/limyrx-1.0.0.jar"
         },
         {
           "path": "mods/discord-rpc-java-1.0.4.jar",
-          "sha1": "571f66e9d98d99c72bb9a2f63d6282292efca6c0"
+          "sha1": "571f66e9d98d99c72bb9a2f63d6282292efca6c0",
+          "url": "https://github.com/ILMaRkz-Y/Limyrx-Client/releases/download/v0.56.8/discord-rpc-java-1.0.4.jar"
         }
       ]
     }

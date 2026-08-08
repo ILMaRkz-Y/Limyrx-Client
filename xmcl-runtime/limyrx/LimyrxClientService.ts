@@ -89,11 +89,13 @@ export class LimyrxClientService extends AbstractService implements ILimyrxClien
     }
     let installed = 0
     for (const file of version.files) {
-      // Download order is enforced here (not trusted to the manifest) so a
-      // stale cached manifest can never point downloads at a dead source:
-      // raw GitHub first, then the CDN mirror, then whatever the manifest
-      // declares as its base.
+      // Download order: an explicit per-file URL (GitHub release asset) is
+      // tried first, then raw GitHub, the CDN mirror and finally whatever the
+      // manifest declares as its base. Ordering is enforced here (not trusted
+      // to the manifest) so a stale cached manifest can never point downloads
+      // at a dead source.
       const urls = Array.from(new Set([
+        ...(file.url ? [file.url] : []),
         `${RAW_CONTENT_BASE}/${version.minecraft}/${file.path}`,
         `${CDN_CONTENT_BASE}/${version.minecraft}/${file.path}`,
         `${version.base}/${file.path}`,

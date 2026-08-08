@@ -12,6 +12,11 @@ export interface LimyrxManifestFile {
   path: string
   /** SHA-1 hex digest of the file content, used to verify the download. */
   sha1: string
+  /**
+   * Optional direct download URL (e.g. a GitHub release asset). When
+   * present it is tried before `${version.base}/${path}`.
+   */
+  url?: string
 }
 
 /**
