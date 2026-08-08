@@ -25,6 +25,10 @@ export interface SeedInstance {
   edition?: 'java' | 'bedrock'
   /** Optional resolved-version JSON `id` to embed. Defaults to minecraft. */
   versionId?: string
+  /** Limyrx Client runtime marker (e.g. '1.8.9') to seed into instance.json. */
+  limyrx?: string
+  /** Forge version (e.g. '11.15.1.2318') to seed into instance.json. */
+  forge?: string
 }
 
 /**
@@ -72,7 +76,11 @@ export async function seedSandbox(gameDataPath: string, instance?: SeedInstance)
     JSON.stringify({
       name: instance.name,
       edition,
-      runtime: { minecraft: instance.minecraft },
+      runtime: {
+        minecraft: instance.minecraft,
+        ...(instance.limyrx ? { limyrx: instance.limyrx } : {}),
+        ...(instance.forge ? { forge: instance.forge } : {}),
+      },
       version: edition === 'java' ? versionId : '',
       lastAccessDate: Date.now(),
       creationDate: Date.now(),

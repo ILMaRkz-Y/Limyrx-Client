@@ -46,6 +46,11 @@ describe('generateBaseName', () => {
   test('should only use first matching loader (forge > fabric > quilt > neoForged > labyMod)', () => {
     expect(generateBaseName(rt({ minecraft: '1.20.1', forge: '47.2.0', fabricLoader: '0.14.21' }))).toBe('1.20.1-forge47.2.0')
   })
+
+  test('should use Limyrx Client name for limyrx runtime regardless of loaders', () => {
+    expect(generateBaseName(rt({ minecraft: '1.20.1', limyrx: '1.0.0' }))).toBe('Limyrx Client')
+    expect(generateBaseName(rt({ minecraft: '1.20.1', forge: '47.2.0', limyrx: '1.0.0' }))).toBe('Limyrx Client')
+  })
 })
 
 describe('generateDistinctName', () => {

@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-keystone-ui/` and the
 
 If the anchor you need is not here, add a `data-testid="…"` attribute to the corresponding Vue component, then re-run `pnpm gen:testids`.
 
-**Total anchors:** 158 (in 274 Vue files)
+**Total anchors:** 159 (in 274 Vue files)
 
 | Test ID | Defined in |
 |---|---|
@@ -69,6 +69,7 @@ If the anchor you need is not here, add a `data-testid="…"` attribute to the c
 | `home-bedrock-unsupported` | [`limyrx-keystone-ui/src/views/HomeBedrock.vue#L14`](../limyrx-keystone-ui/src/views/HomeBedrock.vue#L14) |
 | `home-folder-action` | [`limyrx-keystone-ui/src/views/HomeActions.vue#L29`](../limyrx-keystone-ui/src/views/HomeActions.vue#L29) |
 | `home-grid` | [`limyrx-keystone-ui/src/views/HomeGrid.vue#L2`](../limyrx-keystone-ui/src/views/HomeGrid.vue#L2) |
+| `home-instance-icon` | [`limyrx-keystone-ui/src/views/HomeHeader.vue#L29`](../limyrx-keystone-ui/src/views/HomeHeader.vue#L29) |
 | `home-log-action` | [`limyrx-keystone-ui/src/views/HomeActions.vue#L16`](../limyrx-keystone-ui/src/views/HomeActions.vue#L16) |
 | `home-server-card` | [`limyrx-keystone-ui/src/views/HomeServerCard.vue#L3`](../limyrx-keystone-ui/src/views/HomeServerCard.vue#L3) |
 | `home-world-card` | [`limyrx-keystone-ui/src/views/HomeWorldCard.vue#L3`](../limyrx-keystone-ui/src/views/HomeWorldCard.vue#L3) |

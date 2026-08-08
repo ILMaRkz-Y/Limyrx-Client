@@ -1,6 +1,6 @@
 <template>
   <div
-    class="header sticky max-w-full select-all transition-all"
+    class="header sticky max-w-full select-none transition-all"
     :style="{
       '--app-bar-blur': blurAppBar + 'px',
     }"
@@ -19,16 +19,27 @@
         opacity: dragover ? 0 : '',
       }"
     >
-      <!-- Top row: instance name + actions -->
+      <!-- Top row: instance icon + name + actions -->
       <div
         class="align-center flex max-h-20 flex-1 flex-grow-0 items-baseline pl-6 pr-2 gap-1"
       >
-        <span
-          :style="{
-            fontSize: headerFontSize
-          }"
-          class="home-title overflow-hidden overflow-ellipsis whitespace-nowrap transition-all"
-        >{{ name || `Minecraft ${version.minecraft}` }}</span>
+        <div class="align-center flex min-w-0 flex-shrink">
+          <v-img
+            v-if="instanceIcon"
+            data-testid="home-instance-icon"
+            :src="instanceIcon"
+            :width="32"
+            :height="32"
+            draggable="false"
+            class="home-instance-icon me-2"
+          />
+          <span
+            :style="{
+              fontSize: headerFontSize
+            }"
+            class="home-title overflow-hidden overflow-ellipsis whitespace-nowrap transition-all"
+          >{{ name || `Minecraft ${version.minecraft}` }}</span>
+        </div>
         <router-view name="route" />
         <div class="flex-grow" />
         <router-view name="actions" v-slot="{ Component }">
@@ -39,22 +50,6 @@
             <component :is="Component" class="flex-shrink-0" />
           </transition>
         </router-view>
-      </div>
-
-      <!-- Info strip: version items in a compact chip row -->
-      <div v-if="items.length > 0" class="info-strip px-6 pb-1">
-        <span
-          v-for="item in items"
-          :key="item.title"
-          class="info-chip"
-        >
-          <v-avatar v-if="item.avatar" size="14" class="info-chip-icon">
-            <v-img :src="item.avatar" />
-          </v-avatar>
-          <v-icon v-else-if="item.icon" size="14" class="info-chip-icon text-medium-emphasis">{{ item.icon }}</v-icon>
-          <span class="info-chip-label">{{ item.title }}</span>
-          <span class="info-chip-value">{{ item.text }}</span>
-        </span>
       </div>
 
       <!-- Extensions slot (launch button lives here) -->
@@ -107,12 +102,10 @@ import { kInstance } from '@/composables/instance'
 import { AddInstanceDialogKey } from '@/composables/instanceTemplates'
 import { kCompact } from '@/composables/scrollTop'
 import { kTheme } from '@/composables/theme'
-import { useExtensionItemsGamePlay, useExtensionItemsVersion } from '@/composables/extensionItems'
-import { kInstanceVersion } from '@/composables/instanceVersion'
 import { injection } from '@/util/inject'
+import { getInstanceIcon } from '@/util/favicon'
 
 const { name, runtime: version, instance } = injection(kInstance)
-const { versionHeader } = injection(kInstanceVersion)
 const { blurAppBar } = injection(kTheme)
 const { t } = useI18n()
 
@@ -154,10 +147,7 @@ const onDropModpack = (e: DragEvent) => {
 
 const overcount = ref(0)
 
-// Instance version info — shown in the compact info strip
-const versionItems = useExtensionItemsVersion(instance, versionHeader)
-const playDataItems = useExtensionItemsGamePlay(instance)
-const items = computed(() => [...versionItems.value, ...playDataItems.value])
+const instanceIcon = computed(() => getInstanceIcon(instance.value, undefined))
 </script>
 <style scoped>
 .header {
@@ -198,48 +188,12 @@ const items = computed(() => [...versionItems.value, ...playDataItems.value])
   padding-bottom: 1.25rem;
 }
 
-/* ── Info strip — glass chip row under the instance name ── */
-.info-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 12px;
-  line-height: 1;
-}
-
-.info-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: var(--md-shape-full);
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgb(var(--v-theme-on-surface));
-  white-space: nowrap;
-}
-
-:root.dark .info-chip,
-.dark .info-chip {
-  background: rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.info-chip-icon {
+.home-instance-icon {
   flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.info-chip-label {
-  font-weight: 500;
-  opacity: 0.7;
-}
-
-.info-chip-value {
-  font-weight: 600;
-  color: rgb(var(--v-theme-on-surface));
+  align-self: center;
+  border-radius: 10px;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 </style>

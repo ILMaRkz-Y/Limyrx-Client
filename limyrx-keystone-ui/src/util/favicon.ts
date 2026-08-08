@@ -12,6 +12,9 @@ export function getInstanceIcon(instance: InstanceData, status: ServerStatus | u
     if (instance.edition === 'bedrock') {
       return BuiltinImages.bedrock
     }
+    if (instance.runtime.limyrx) {
+      return BuiltinImages.limyrxClient
+    }
     if (instance.runtime.forge) {
       return BuiltinImages.forge
     } else if (instance.runtime.neoForged) {

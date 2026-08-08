@@ -1,6 +1,9 @@
 import { RuntimeVersions } from '@xmcl/instance'
 
 export function generateBaseName(runtime: RuntimeVersions) {
+  if (runtime.limyrx) {
+    return 'Limyrx Client'
+  }
   let name = runtime.minecraft
   if (runtime.forge) {
     name += `-forge${runtime.forge}`

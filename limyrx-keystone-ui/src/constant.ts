@@ -13,6 +13,7 @@ import oculus from '@/assets/oculus.webp'
 import prism from '@/assets/prism.png'
 import bedrock from '@/assets/LargeLogo.png'
 import limyrx from '@/assets/logo.webp'
+import limyrxClient from '@/assets/limyrx-client.gif'
 
 export const BuiltinImages = {
   minecraft,
@@ -30,5 +31,6 @@ export const BuiltinImages = {
   prism,
   bedrock,
   limyrx,
+  limyrxClient,
 }
 
