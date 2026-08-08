@@ -198,6 +198,7 @@ import {
   BedrockServiceKey,
 } from '@xmcl/runtime-api'
 import { useDialog } from '../composables/dialog'
+import { useLocaleError } from '../composables/error'
 import { kInstanceCreation, useInstanceCreation } from '../composables/instanceCreation'
 import { AddInstanceDialogKey } from '../composables/instanceTemplates'
 import { useModpackFinishInstall } from '@/composables/modpackInstaller'
@@ -540,6 +541,7 @@ const onUpdateExisting = async () => {
 // Stepper model
 const valid = ref(false)
 const step = ref(1)
+const tError = useLocaleError()
 const errorText = computed(() => {
   const err = error.value
   if (isException(ModpackException, err)) {
@@ -551,16 +553,24 @@ const errorText = computed(() => {
       return 'errors.RequireModpackAFile'
     }
   }
-  return t('errors.BadInstanceType', {
-    type:
-      type.value === 'mmc'
-        ? 'MultiMC'
-        : type.value === 'modrinth'
-          ? 'Modrinth'
-          : type.value === 'prism'
-            ? 'PrismLauncher'
-            : '',
-  })
+  // Modpack import flows keep the "not a valid instance" label so the user
+  // understands the file they picked was rejected. Every other flow (manual,
+  // template, Limyrx Client, ...) shows the actual error instead of masking
+  // it behind an empty "{type}" placeholder, which only confused users.
+  const maskedType =
+    type.value === 'mmc'
+      ? 'MultiMC'
+      : type.value === 'modrinth'
+        ? 'Modrinth'
+        : type.value === 'prism'
+          ? 'PrismLauncher'
+          : ''
+  if (maskedType) {
+    return t('errors.BadInstanceType', {
+      type: maskedType,
+    })
+  }
+  return tError(err)
 })
 const steps = computed(() => {
   if (type.value === 'server') {

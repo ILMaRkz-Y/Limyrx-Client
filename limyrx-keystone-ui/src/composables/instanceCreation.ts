@@ -286,6 +286,9 @@ export function useInstanceCreation(gameProfile: Ref<GameProfile>, instances: Re
         }
         return newPath
       } catch (e) {
+        // Surface the failure in the dialog (error.value) AND in the log so
+        // the actual cause is never hidden by the UI's translated message.
+        console.error('Failed to create instance:', e)
         error.value = e
       } finally {
         loading.value = false

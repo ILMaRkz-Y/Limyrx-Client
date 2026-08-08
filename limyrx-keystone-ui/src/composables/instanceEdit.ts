@@ -85,6 +85,7 @@ export function useInstanceEdit(
       optifine: instance.value?.runtime.optifine ?? '',
       neoForged: instance.value?.runtime.neoForged ?? '',
       labyMod: instance.value?.runtime.labyMod ?? '',
+      limyrx: instance.value?.runtime.limyrx ?? '',
     } as RuntimeVersions,
     version: '',
 
@@ -294,6 +295,7 @@ export function useInstanceEdit(
     if (!eq(current.runtime.fabricLoader, data.runtime.fabricLoader)) return true
     if (!eq(current.runtime.quiltLoader, data.runtime.quiltLoader)) return true
     if (!eq(current.runtime.optifine, data.runtime.optifine)) return true
+    if (!eq(current.runtime.limyrx, data.runtime.limyrx)) return true
     if (!eq(current.icon, data.icon)) return true
     return false
   })
@@ -419,6 +421,7 @@ export function useInstanceEdit(
       data.runtime.quiltLoader = current.runtime.quiltLoader ?? ''
       data.runtime.neoForged = current.runtime.neoForged ?? ''
       data.runtime.labyMod = current.runtime.labyMod ?? ''
+      data.runtime.limyrx = current.runtime.limyrx ?? ''
       data.version = current.version
       data.icon = current.icon
       data.disableAuthlibInjector = current.disableAuthlibInjector
@@ -505,6 +508,8 @@ export function useInstanceEditVersions(
       runtime.fabricLoader = ''
       runtime.quiltLoader = ''
       runtime.optifine = ''
+      runtime.labyMod = ''
+      runtime.limyrx = ''
     }
   }
   function onSelectForge(version: string) {
@@ -517,6 +522,8 @@ export function useInstanceEditVersions(
         runtime.fabricLoader = ''
         runtime.quiltLoader = ''
         runtime.optifine = ''
+        runtime.labyMod = ''
+        runtime.limyrx = ''
       }
     }
   }
@@ -530,6 +537,8 @@ export function useInstanceEditVersions(
         runtime.fabricLoader = ''
         runtime.quiltLoader = ''
         runtime.optifine = ''
+        runtime.labyMod = ''
+        runtime.limyrx = ''
       }
     }
   }
@@ -542,6 +551,8 @@ export function useInstanceEditVersions(
         runtime.neoForged = ''
         runtime.quiltLoader = ''
         runtime.optifine = ''
+        runtime.labyMod = ''
+        runtime.limyrx = ''
       }
       runtime.fabricLoader = version
     }
@@ -555,6 +566,8 @@ export function useInstanceEditVersions(
         runtime.neoForged = ''
         runtime.forge = runtime.fabricLoader = ''
         runtime.optifine = ''
+        runtime.labyMod = ''
+        runtime.limyrx = ''
       }
     }
   }
@@ -566,6 +579,8 @@ export function useInstanceEditVersions(
         data.version = ''
         runtime.quiltLoader = runtime.fabricLoader = ''
         runtime.neoForged = ''
+        runtime.labyMod = ''
+        runtime.limyrx = ''
       }
     }
   }
@@ -580,6 +595,7 @@ export function useInstanceEditVersions(
         runtime.neoForged = ''
         runtime.optifine = ''
         runtime.forge = ''
+        runtime.limyrx = ''
       }
     }
   }

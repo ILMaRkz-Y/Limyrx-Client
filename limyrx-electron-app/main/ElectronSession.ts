@@ -62,20 +62,33 @@ export class ElectronSession {
                 ? 'text/html'
                 : url.pathname.endsWith('.json')
                   ? 'application/json'
-                  : url.pathname.endsWith('.png')
-                    ? 'image/png'
-                    : url.pathname.endsWith('.svg')
-                      ? 'image/svg+xml'
-                      : url.pathname.endsWith('.ico')
-                        ? 'image/x-icon'
-                        : url.pathname.endsWith('.woff')
-                          ? 'font/woff'
-                          : url.pathname.endsWith('.woff2')
-                            ? 'font/woff2'
-                            : url.pathname.endsWith('.ttf')
-                              ? 'font/ttf'
-                              // webp
-                              : url.pathname.endsWith('.webp') ? 'image/webp' : ''
+                : url.pathname.endsWith('.png')
+                  ? 'image/png'
+                  : url.pathname.endsWith('.jpg') || url.pathname.endsWith('.jpeg')
+                    ? 'image/jpeg'
+                    : url.pathname.endsWith('.gif')
+                      ? 'image/gif'
+                      : url.pathname.endsWith('.svg')
+                        ? 'image/svg+xml'
+                        : url.pathname.endsWith('.ico')
+                          ? 'image/x-icon'
+                          : url.pathname.endsWith('.woff')
+                            ? 'font/woff'
+                            : url.pathname.endsWith('.woff2')
+                              ? 'font/woff2'
+                              : url.pathname.endsWith('.ttf')
+                                ? 'font/ttf'
+                                // webp
+                                : url.pathname.endsWith('.webp') ? 'image/webp'
+                                  : url.pathname.endsWith('.mp3')
+                                    ? 'audio/mpeg'
+                                    : url.pathname.endsWith('.wav')
+                                      ? 'audio/wav'
+                                      : url.pathname.endsWith('.ogg')
+                                        ? 'audio/ogg'
+                                        : url.pathname.endsWith('.mp4')
+                                          ? 'video/mp4'
+                                          : url.pathname.endsWith('.webm') ? 'video/webm' : ''
         return new Response(Readable.toWeb(createReadStream(realPath)) as any, {
           headers: {
             'Content-Type': mimeType,

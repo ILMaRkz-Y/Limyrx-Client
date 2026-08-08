@@ -154,7 +154,22 @@ const loaders = [
 
 const currentTab = ref('vanilla')
 
+/**
+ * A loader card the user clicked in the same tick. The runtime watcher below
+ * derives `currentTab` exclusively from runtime state, so a card click that
+ * also mutates runtime (e.g. clearing the Limyrx-pinned forge build) fires
+ * the watcher and would snap the tab back to whatever marker is still set —
+ * most visibly Limyrx. `pendingManual` makes the manual selection win that
+ * one flush, then clears itself so later runtime changes derive normally.
+ */
+let pendingManual = ''
+
 watch([() => props.data.runtime, () => props.data.version], ([rt, version]) => {
+  if (pendingManual) {
+    currentTab.value = pendingManual
+    pendingManual = ''
+    return
+  }
   if (rt.limyrx) currentTab.value = 'limyrx'
   else if (rt.labyMod) currentTab.value = 'labymod'
   else if (rt.quiltLoader) currentTab.value = 'quilt'
@@ -167,6 +182,7 @@ watch([() => props.data.runtime, () => props.data.version], ([rt, version]) => {
 }, { deep: true, immediate: true })
 
 function resetToVanilla() {
+  pendingManual = ''
   currentTab.value = 'vanilla'
   props.data.runtime.forge = ''
   props.data.runtime.fabricLoader = ''
@@ -184,7 +200,14 @@ function selectLoader(loader: string) {
     resetToVanilla()
     return
   }
+  pendingManual = loader
   currentTab.value = loader
+  if (loader !== 'limyrx') {
+    // Switching away from a Limyrx-selected runtime: drop the Limyrx marker so
+    // neither the tab derivation nor the created/edited instance keeps the
+    // Limyrx client when another loader is picked.
+    props.data.runtime.limyrx = ''
+  }
   if (loader === 'limyrx') {
     onSelectLimyrx('')
   } else if (loader === 'forge') {
