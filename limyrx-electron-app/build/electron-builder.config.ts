@@ -82,12 +82,9 @@ export const config = {
     target: [
       {
         target: 'zip',
-        arch: [
-          'x64',
-          'ia32',
-        ],
+        arch: ['x64'],
       },
-      'appx',
+      'nsis',
     ],
   },
   linux: {
