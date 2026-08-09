@@ -2,7 +2,7 @@
     "name": "limyrx",
     "private": true,
     "main": "./index.js",
-    "version": "0.64.4",
+    "version": "0.64.5",
     "author": "ci010 <cijhn@hotmail.com>",
     "description": "Limyrx Client - A modern Minecraft launcher",
     "license": "MIT",
