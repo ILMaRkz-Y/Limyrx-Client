@@ -32,6 +32,16 @@ export const config = {
     to: '.',
     filter: 'package.json',
   }],
+  // Bundle the Limyrx Client content (mod jars + manifest) into the packaged
+  // app so instances can be created fully offline. electron-builder copies it
+  // outside app.asar to <resources>/limyrx-client, which the runtime resolves
+  // via process.resourcesPath. Adding a mod later = drop the jar into the
+  // repo's limyrx-client folder, bump the manifest, rebuild the installer.
+  extraResources: [{
+    from: '../limyrx-client',
+    to: 'limyrx-client',
+    filter: ['**/*'],
+  }],
   artifactName: 'limyrx-${version}-${platform}-${arch}.${ext}',
   appx: {
     displayName: 'Limyrx Client',

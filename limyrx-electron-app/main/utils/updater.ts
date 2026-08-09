@@ -389,6 +389,9 @@ export class ElectronUpdater implements LauncherAppUpdater {
   async #getUpdateFromAutoUpdater(): Promise<ReleaseInfo> {
     const autoUpdater = updater.autoUpdater
 
+    const { allowPrerelease } = await this.app.registry.get(kSettings)
+    autoUpdater.allowPrerelease = !!allowPrerelease
+
     this.logger.log(`Check update via ${autoUpdater.getFeedURL()}`)
     const info = await autoUpdater.checkForUpdates()
     if (!info) throw new Error('No update info found')
@@ -480,9 +483,12 @@ export class ElectronUpdater implements LauncherAppUpdater {
   }
 
   async checkUpdateTask(): Promise<ReleaseInfo> {
-    if (this.app.platform.os === 'windows' || this.app.platform.os === 'osx') {
-      return this.#getUpdateFromSelfHost()
-    }
+    // electron-updater reads the GitHub feed (owner/repo from app-update.yml,
+    // latest.yml asset of the newest release) on every platform, so updates
+    // come straight from the Limyrx releases. The self-host API belongs to
+    // upstream XMCL and knows nothing about Limyrx releases — it is only kept
+    // as a fallback for when electron-updater has no feed configured
+    // (unpackaged / dev runs without app-update.yml).
     try {
       return await this.#getUpdateFromAutoUpdater()
     } catch (e) {

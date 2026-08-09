@@ -1,5 +1,5 @@
 import { createHash } from 'crypto'
-import { ensureDir, pathExists, readFile, writeFile } from 'fs-extra'
+import { ensureDir, existsSync, pathExists, readFile, writeFile } from 'fs-extra'
 import { dirname, join } from 'path'
 import { AnyError } from '@xmcl/utils'
 import {
@@ -31,6 +31,34 @@ const CDN_MANIFEST_URL = 'https://cdn.jsdelivr.net/gh/ILMaRkz-Y/Limyrx-Client@ma
 const RAW_MANIFEST_URL = 'https://raw.githubusercontent.com/ILMaRkz-Y/Limyrx-Client/main/limyrx-client/manifest.json'
 const RAW_CONTENT_BASE = 'https://raw.githubusercontent.com/ILMaRkz-Y/Limyrx-Client/main/limyrx-client'
 const CDN_CONTENT_BASE = 'https://cdn.jsdelivr.net/gh/ILMaRkz-Y/Limyrx-Client@main/limyrx-client'
+
+/**
+ * Resolve the local content bundle: the repo's `limyrx-client/` folder that
+ * electron-builder ships inside the packaged app via `extraResources`.
+ *
+ * The runtime never imports electron, so the packaged location is derived
+ * from `process.resourcesPath` (the directory holding app.asar at runtime);
+ * dev / test builds fall back to the repository checkout. Returns undefined
+ * when no bundle is present so the network sources stay authoritative.
+ */
+function getBundledContentRoot(): string | undefined {
+  const resourcesPath = (process as NodeJS.Process & { resourcesPath?: string }).resourcesPath
+  const candidates = [
+    resourcesPath ? join(resourcesPath, 'limyrx-client') : undefined,
+    // Dev / tests: the bundle lives at <repo>/limyrx-client. The bundled
+    // main runs from limyrx-electron-app/dist/main, so three levels up.
+    join(__dirname, '..', '..', '..', 'limyrx-client'),
+    join(process.cwd(), '..', 'limyrx-client'),
+  ].filter((p): p is string => !!p)
+  for (const candidate of candidates) {
+    try {
+      if (existsSync(join(candidate, 'manifest.json'))) return candidate
+    } catch {
+      // Not accessible — try the next candidate.
+    }
+  }
+  return undefined
+}
 
 /**
  * The Limyrx Client platform: a curated Forge-based client whose mods and
@@ -108,6 +136,11 @@ export class LimyrxClientService extends AbstractService implements ILimyrxClien
   }
 
   async installContent(instancePath: string, minecraft: string): Promise<LimyrxInstallResult> {
+    // Always fetch a fresh manifest for installs: getManifest() caches for the
+    // launcher session, so a launcher running since before the host pushed new
+    // content would otherwise install a stale (e.g. 2-mod) bundle into brand
+    // new instances.
+    await this.refreshManifest()
     const version = await this.getVersion(minecraft)
     let installed = 0
     for (const file of version.files) {
@@ -193,11 +226,53 @@ export class LimyrxClientService extends AbstractService implements ILimyrxClien
    * Download a single manifest file into the instance, trying each source in
    * order and verifying the SHA-1 checksum before writing it to disk.
    */
+  /**
+   * Copy a single manifest file from the content bundle shipped with the
+   * launcher into the instance, verifying the SHA-1 against the manifest.
+   * Returns false when the file isn't bundled or fails verification so the
+   * caller can fall back to the network.
+   */
+  private async installFromBundle(
+    version: LimyrxManifestVersion,
+    file: LimyrxManifestFile,
+    dest: string,
+  ): Promise<boolean> {
+    const root = getBundledContentRoot()
+    if (!root) return false
+    const source = join(root, version.minecraft, file.path)
+    try {
+      if (!(await pathExists(source))) return false
+      const buf = await readFile(source)
+      if (createHash('sha1').update(buf).digest('hex') !== file.sha1) {
+        this.logger.warn(`[Limyrx] Bundled ${file.path} failed SHA-1, falling back to network`)
+        return false
+      }
+      await ensureDir(dirname(dest))
+      await writeFile(dest, buf)
+      return true
+    } catch (e) {
+      this.logger.warn(`[Limyrx] Cannot install bundled ${file.path}`)
+      this.logger.warn(e)
+      return false
+    }
+  }
+
+  /**
+   * Install a single manifest file into the instance, preferring the content
+   * bundle shipped with the launcher (offline instance creation) and falling
+   * back to the network. The manifest stays the single source of truth for
+   * paths and checksums, so a stale bundle never installs unverified content.
+   */
   private async downloadAndVerify(
     instancePath: string,
     file: LimyrxManifestFile,
     version: LimyrxManifestVersion,
   ): Promise<void> {
+    const dest = join(instancePath, file.path)
+    if (await this.installFromBundle(version, file, dest)) {
+      return
+    }
+
     // Download order: an explicit per-file URL (GitHub release asset) is
     // tried first, then raw GitHub, the CDN mirror and finally whatever the
     // manifest declares as its base. Ordering is enforced here (not trusted
@@ -209,7 +284,6 @@ export class LimyrxClientService extends AbstractService implements ILimyrxClien
       `${CDN_CONTENT_BASE}/${version.minecraft}/${file.path}`,
       `${version.base}/${file.path}`,
     ]))
-    const dest = join(instancePath, file.path)
     let resp: Response | undefined
     let lastError: unknown
     for (const url of urls) {
