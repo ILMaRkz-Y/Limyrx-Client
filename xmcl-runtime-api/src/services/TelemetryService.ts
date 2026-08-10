@@ -51,19 +51,22 @@ export interface LimyrxFirstInstallPayload {
 }
 
 /**
- * Anonymous, opt-in analytics for the Limyrx stats dashboard. Everything is
- * OFF by default and only sends while the `enableLimyrxMetrics` setting is
- * on. The single setting doubles as the user's consent — no data (including
- * the Minecraft username) leaves the device without it.
+ * Limyrx analytics.
+ *
+ * A minimal anonymous heartbeat (device id, launcher version, OS) is always
+ * sent so the dashboard can count real `online now` and installs. The
+ * Minecraft username and game event reporting are opt-in and controlled by the
+ * `enableLimyrxMetrics` setting.
  */
 export interface TelemetryService {
   /**
-   * True while metrics are enabled, the device id exists and the service is
-   * not disabled by an E2E run.
+   * True while detailed metrics are enabled (username + game events), the
+   * device id exists and the service is not disabled by an E2E run.
    */
   readonly consented: boolean
   /**
-   * Send a heartbeat immediately (independent of the 2-minute timer).
+   * Send a heartbeat immediately (independent of the 2-minute timer). Always
+   * sends the anonymous part; the username only when `consented`.
    */
   heartbeat(): Promise<void>
   /**

@@ -1714,7 +1714,7 @@ setting:
   disableTelemetry: Disable Telemetry
   disableTelemetryDescription: XMCL will collect the game launch and user login events.
   enableLimyrxMetrics: Limyrx Stats
-  enableLimyrxMetricsDescription: Share anonymous usage data with the Limyrx stats dashboard (online count, downloads, game launches, Minecraft username).
+  enableLimyrxMetricsDescription: Share your Minecraft username and game activity (launch/exit) with the Limyrx dashboard. Basic anonymous usage (online count, launcher version, OS) is always shared.
   enableDedicatedGPUOptimization: Assign Dedicated GPU
   enableDedicatedGPUOptimizationDescription: This option will assign dedicated GPU to Minecraft process.
   enableDiscord: Enable Discord Presence

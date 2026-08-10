@@ -1480,7 +1480,7 @@ setting:
   disableTelemetry: 关闭遥测
   disableTelemetryDescription: XMCL 会收集游戏启动以及用户登录事件
   enableLimyrxMetrics: Limyrx 统计
-  enableLimyrxMetricsDescription: 向 Limyrx 统计面板共享匿名使用数据（在线人数、下载量、游戏启动、Minecraft 用户名）。
+  enableLimyrxMetricsDescription: 向 Limyrx 仪表盘共享您的 Minecraft 用户名和游戏活动（启动/退出）。基础匿名使用数据（在线人数、启动器版本、操作系统）始终共享。
   enableDedicatedGPUOptimization: 分配专用 GPU
   enableDedicatedGPUOptimizationDescription: 此选项将为 Minecraft 进程分配专用 GPU。
   enableDiscord: 启用 Discord Presence

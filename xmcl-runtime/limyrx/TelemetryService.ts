@@ -28,13 +28,14 @@ function isE2E() {
 }
 
 /**
- * Anonymous, opt-in telemetry for the Limyrx stats dashboard.
+ * Limyrx telemetry.
  *
- * Nothing is sent while `enableLimyrxMetrics` is off (the default). When the
- * user opts in, the launcher reports a heartbeat every two minutes and emits
- * game launch/exit events. The only potentially identifiable field — the
- * Minecraft username — is derived from the user state and included solely
- * because the user turned the toggle on.
+ * A minimal, anonymous heartbeat (device id + launcher version + OS) is always
+ * sent on startup and every two minutes so the dashboard can count installs
+ * and "online now" accurately. The Minecraft username and game events are only
+ * sent while the user enabled `enableLimyrxMetrics` — that toggle is the
+ * consent for the personally identifiable part of the metrics. On the very
+ * first run a one-off `first-install` ping triggers the Discord notification.
  */
 @ExposeServiceKey(TelemetryServiceKey)
 export class TelemetryService extends AbstractService implements ITelemetryService {
@@ -54,11 +55,14 @@ export class TelemetryService extends AbstractService implements ITelemetryServi
         this.reportFirstInstall().catch(() => { })
       }
 
+      // Anonymous heartbeat runs always (one ping on startup + every 2 min)
+      // so the dashboard can count real online users. The Minecraft username
+      // is only attached while `enableLimyrxMetrics` is enabled.
+      await this.start()
+
       this.settings.subscribe('enableLimyrxMetricsSet', async (enabled) => {
         if (enabled) {
-          await this.start()
-        } else {
-          this.stop()
+          await this.heartbeat().catch(() => { })
         }
       })
 
@@ -68,10 +72,6 @@ export class TelemetryService extends AbstractService implements ITelemetryServi
       this.launchService.on('minecraft-exit', ({ code }) => {
         this.reportEvent('game_exit', { code }).catch(() => { })
       })
-
-      if (this.settings.enableLimyrxMetrics) {
-        await this.start()
-      }
     })
   }
 
@@ -80,14 +80,16 @@ export class TelemetryService extends AbstractService implements ITelemetryServi
   }
 
   async heartbeat(): Promise<void> {
-    if (!this.consented) return
+    if (isE2E() || !this.deviceId) return
     const payload: LimyrxHeartbeatPayload = {
       deviceId: this.deviceId,
       launcherVersion: this.app.version,
       os: process.platform,
     }
-    const username = await this.getUsername()
-    if (username) payload.username = username
+    if (this.settings.enableLimyrxMetrics) {
+      const username = await this.getUsername()
+      if (username) payload.username = username
+    }
     await this.post('/heartbeat', payload)
   }
 
@@ -113,20 +115,12 @@ export class TelemetryService extends AbstractService implements ITelemetryServi
   }
 
   private async start(): Promise<void> {
-    if (this.started) return
+    if (this.started || isE2E()) return
     this.started = true
     await this.heartbeat().catch(() => { })
     this.timer = setInterval(() => {
       this.heartbeat().catch(() => { })
     }, HEARTBEAT_INTERVAL_MS)
-  }
-
-  private stop(): void {
-    this.started = false
-    if (this.timer) {
-      clearInterval(this.timer)
-      this.timer = undefined
-    }
   }
 
   /**
