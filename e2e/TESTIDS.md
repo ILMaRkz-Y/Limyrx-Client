@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-keystone-ui/` and the
 
 If the anchor you need is not here, add a `data-testid="…"` attribute to the corresponding Vue component, then re-run `pnpm gen:testids`.
 
-**Total anchors:** 164 (in 275 Vue files)
+**Total anchors:** 170 (in 276 Vue files)
 
 | Test ID | Defined in |
 |---|---|
@@ -77,6 +77,12 @@ If the anchor you need is not here, add a `data-testid="…"` attribute to the c
 | `home-instance-icon` | [`limyrx-keystone-ui/src/views/HomeHeader.vue#L29`](../limyrx-keystone-ui/src/views/HomeHeader.vue#L29) |
 | `home-log-action` | [`limyrx-keystone-ui/src/views/HomeActions.vue#L16`](../limyrx-keystone-ui/src/views/HomeActions.vue#L16) |
 | `home-server-card` | [`limyrx-keystone-ui/src/views/HomeServerCard.vue#L3`](../limyrx-keystone-ui/src/views/HomeServerCard.vue#L3) |
+| `home-update-banner` | [`limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L4`](../limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L4) |
+| `home-update-banner-discord` | [`limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L48`](../limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L48) |
+| `home-update-banner-dismiss` | [`limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L97`](../limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L97) |
+| `home-update-banner-update` | [`limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L65`](../limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L65)<br>[`limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L81`](../limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L81) |
+| `home-update-banner-version` | [`limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L24`](../limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L24) |
+| `home-update-banner-whats-new` | [`limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L36`](../limyrx-keystone-ui/src/views/HomeUpdateBanner.vue#L36) |
 | `home-world-card` | [`limyrx-keystone-ui/src/views/HomeWorldCard.vue#L3`](../limyrx-keystone-ui/src/views/HomeWorldCard.vue#L3) |
 | `install-incompatible-alert` | [`limyrx-keystone-ui/src/views/HomeInstanceInstallDialog.vue#L70`](../limyrx-keystone-ui/src/views/HomeInstanceInstallDialog.vue#L70) |
 | `install-instance-confirm` | [`limyrx-keystone-ui/src/views/HomeInstanceInstallDialog.vue#L267`](../limyrx-keystone-ui/src/views/HomeInstanceInstallDialog.vue#L267) |

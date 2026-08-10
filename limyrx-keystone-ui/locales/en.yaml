@@ -762,6 +762,12 @@ launcherUpdate:
   installAndQuit: Restart to Install
   noUpdateAvailable: No Update Available
   updateToThisVersion: Download and Install
+  banner:
+    dismiss: Dismiss
+    discordTooltip: Join the Limyrx Discord server
+    title: A new version is available
+    updateNow: Update Now
+    whatsNew: What's new?
 localVersion:
   auto: Auto Computed
   empty: No Version Installed

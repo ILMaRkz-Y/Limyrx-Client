@@ -6,6 +6,7 @@
     @wheel="onScroll"
   >
     <HomeHeader ref="headerEl" class="sticky top-0 z-20" />
+    <HomeUpdateBanner />
 
     <!-- This is to fix strange hover color issue... -->
     <router-view v-slot="{ Component }">
@@ -45,6 +46,7 @@ import HomeLaunchStatusDialog from './HomeLaunchStatusDialog.vue'
 import HomeLogDialog from './HomeLogDialog.vue'
 import AppCollectionDialog from './AppCollectionDialog.vue'
 import HomeDropModpackDialog from './HomeDropModpackDialog.vue'
+import HomeUpdateBanner from './HomeUpdateBanner.vue'
 
 const router = useRouter()
 
