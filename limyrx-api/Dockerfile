@@ -6,6 +6,8 @@ WORKDIR /app
 # is a workspace member, even though its runtime deps are all registry-only).
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY limyrx-api ./limyrx-api
+# CI=true: pnpm must not prompt to purge node_modules without a TTY.
+ENV CI=true
 RUN corepack enable \
     && pnpm install --filter limyrx-api --no-frozen-lockfile \
     && pnpm --filter limyrx-api run compile \
