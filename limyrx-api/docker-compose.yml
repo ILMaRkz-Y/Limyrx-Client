@@ -15,7 +15,7 @@ services:
 
   api:
     build:
-      context: .
+      context: ..
       dockerfile: limyrx-api/Dockerfile
     restart: unless-stopped
     environment:
