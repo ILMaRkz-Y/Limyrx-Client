@@ -20,12 +20,15 @@ const inflight = new Map<string, Promise<boolean>>()
  * the shipped launcher. The message includes the OS account name the user
  * chose to share on first run.
  */
-async function notifyDiscord(details: {
-    deviceId: string
-    username?: string
-    launcherVersion?: string
-    os?: string
-}): Promise<boolean> {
+async function notifyDiscord(
+    log: FastifyInstance['log'],
+    details: {
+        deviceId: string
+        username?: string
+        launcherVersion?: string
+        os?: string
+    },
+): Promise<boolean> {
     const webhookUrl = config.discordWebhookUrl
     if (!webhookUrl) {
         return false
@@ -57,9 +60,12 @@ async function notifyDiscord(details: {
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(payload),
             })
+            if (!res.ok) {
+                log.warn(`[install] Discord webhook returned HTTP ${res.status}`)
+            }
             return res.ok
         } catch (err) {
-            void err
+            log.warn(`[install] Discord webhook failed: ${String(err)}`)
             return false
         } finally {
             inflight.delete(details.deviceId)
@@ -91,7 +97,7 @@ export async function installRoutes(app: FastifyInstance): Promise<void> {
                 { deviceId },
                 { $set: { lastSeen: now, ...(launcherVersion ? { launcherVersion } : {}) } })
             if (!existing.installNotified) {
-                const fired = await notifyDiscord({ deviceId, username, launcherVersion, os })
+                const fired = await notifyDiscord(app.log, { deviceId, username, launcherVersion, os })
                 if (fired) {
                     await Device.updateOne({ deviceId }, { $set: { installNotified: true } })
                 }
@@ -107,7 +113,7 @@ export async function installRoutes(app: FastifyInstance): Promise<void> {
             os,
         })
 
-        const fired = await notifyDiscord({ deviceId, username, launcherVersion, os })
+        const fired = await notifyDiscord(app.log, { deviceId, username, launcherVersion, os })
         if (fired) {
             await Device.updateOne({ deviceId }, { $set: { installNotified: true } })
         }

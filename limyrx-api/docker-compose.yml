@@ -28,6 +28,7 @@ services:
       GITHUB_REPO: ${GITHUB_REPO:-ILMaRkz-Y/Limyrx-Client}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
     ports:
       - '127.0.0.1:3000:3000'
     networks:
