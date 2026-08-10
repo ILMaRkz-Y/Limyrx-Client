@@ -1,0 +1,13 @@
+services:
+    dashboard:
+        build: .
+        restart: unless-stopped
+        networks:
+            chatstack:
+                aliases:
+                    - dashboard
+
+networks:
+    chatstack:
+        external: true
+        name: chat-stack_default
