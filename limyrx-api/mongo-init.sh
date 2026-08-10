@@ -7,7 +7,7 @@ mongosh --quiet "mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@localhost:2
   const appPassword = process.env.MONGO_APP_PASSWORD;
   if (!appPassword) { print('MONGO_APP_PASSWORD not set'); quit(1); }
   try {
-    db.getSiblingDB('limyrx').createUser({
+    db.getSiblingDB('admin').createUser({
       user: appUser,
       pwd: appPassword,
       roles: [{ role: 'readWrite', db: 'limyrx' }],
