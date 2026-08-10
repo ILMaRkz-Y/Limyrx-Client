@@ -26,6 +26,11 @@ export class Settings implements SettingSchema {
   discordPresence = false
   developerMode = false
   disableTelemetry = false
+  /**
+   * Opt-in consent for the Limyrx stats dashboard. Default OFF — no data
+   * (including the Minecraft username) leaves the device without it.
+   */
+  enableLimyrxMetrics = false
   linuxTitlebar = false
   windowTranslucent = false
 
@@ -113,6 +118,7 @@ export class Settings implements SettingSchema {
     this.discordPresence = config.discordPresence
     this.developerMode = config.developerMode
     this.disableTelemetry = config.disableTelemetry
+    this.enableLimyrxMetrics = config.enableLimyrxMetrics
     this.linuxTitlebar = config.linuxTitlebar
     this.windowTranslucent = config.windowTranslucent
     this.enableDedicatedGPUOptimization = config.enableDedicatedGPUOptimization
@@ -126,6 +132,10 @@ export class Settings implements SettingSchema {
 
   discordPresenceSet(presence: boolean) {
     this.discordPresence = presence
+  }
+
+  enableLimyrxMetricsSet(enabled: boolean) {
+    this.enableLimyrxMetrics = enabled
   }
 
   themeSet(theme: 'dark' | 'light' | 'system') {

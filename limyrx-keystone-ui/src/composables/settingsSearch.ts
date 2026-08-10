@@ -169,6 +169,22 @@ export function useSettingsSearchItems() {
       },
     })
 
+    list.push({
+      kind: 'switch',
+      id: 'setting.enableLimyrxMetrics',
+      title: t('setting.enableLimyrxMetrics'),
+      description: t('setting.enableLimyrxMetricsDescription'),
+      icon: 'monitoring',
+      group: groupGeneral.value,
+      keywords: 'limyrx stats metrics dashboard analytics opt-in username',
+      get value() {
+        return s.enableLimyrxMetrics
+      },
+      set value(v: boolean) {
+        s.enableLimyrxMetricsSet(v)
+      },
+    })
+
     if (env.value?.os === 'linux' || env.value?.os === 'windows') {
       list.push({
         kind: 'switch',

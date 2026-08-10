@@ -45,6 +45,15 @@
       icon="privacy_tip"
     />
 
+    <!-- Limyrx Stats (opt-in metrics) -->
+    <SettingItemSwitcher
+      v-model="enableLimyrxMetrics"
+      data-testid="setting-limyrx-metrics"
+      :title="t('setting.enableLimyrxMetrics')"
+      :description="t('setting.enableLimyrxMetricsDescription')"
+      icon="monitoring"
+    />
+
     <!-- GPU Optimization (Windows/Linux only) -->
     <template v-if="env?.os === 'linux' || env?.os === 'windows'">
       <v-divider class="my-3" />
@@ -187,6 +196,7 @@ const {
   selectedLocale,
   replaceNative,
   disableTelemetry,
+  enableLimyrxMetrics,
   enableDiscord,
   locales: rawLocales,
   enableDedicatedGPUOptimization,

@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-keystone-ui/` and the
 
 If the anchor you need is not here, add a `data-testid="…"` attribute to the corresponding Vue component, then re-run `pnpm gen:testids`.
 
-**Total anchors:** 170 (in 276 Vue files)
+**Total anchors:** 171 (in 276 Vue files)
 
 | Test ID | Defined in |
 |---|---|
@@ -151,6 +151,7 @@ If the anchor you need is not here, add a `data-testid="…"` attribute to the c
 | `server-tab-export` | [`limyrx-keystone-ui/src/views/BaseSettingServerExport.vue#L160`](../limyrx-keystone-ui/src/views/BaseSettingServerExport.vue#L160) |
 | `server-tab-launch` | [`limyrx-keystone-ui/src/views/BaseSettingExtension.vue#L132`](../limyrx-keystone-ui/src/views/BaseSettingExtension.vue#L132) |
 | `server-upstream-update-row` | [`limyrx-keystone-ui/src/views/HomeFooterCard.vue#L89`](../limyrx-keystone-ui/src/views/HomeFooterCard.vue#L89) |
+| `setting-limyrx-metrics` | [`limyrx-keystone-ui/src/views/SettingGeneral.vue#L51`](../limyrx-keystone-ui/src/views/SettingGeneral.vue#L51) |
 | `settings-check-update` | [`limyrx-keystone-ui/src/views/SettingUpdate.vue#L10`](../limyrx-keystone-ui/src/views/SettingUpdate.vue#L10) |
 | `settings-page` | [`limyrx-keystone-ui/src/views/Setting.vue#L3`](../limyrx-keystone-ui/src/views/Setting.vue#L3) |
 | `settings-proxy-host` | [`limyrx-keystone-ui/src/views/SettingNetwork.vue#L37`](../limyrx-keystone-ui/src/views/SettingNetwork.vue#L37) |

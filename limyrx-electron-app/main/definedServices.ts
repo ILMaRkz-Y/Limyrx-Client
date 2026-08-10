@@ -25,7 +25,7 @@ import {
 } from '@xmcl/runtime/instanceIO'
 import { JavaService } from '@xmcl/runtime/java'
 import { LaunchService, VersionService } from '@xmcl/runtime/launch'
-import { LimyrxClientService } from '@xmcl/runtime/limyrx'
+import { LimyrxClientService, TelemetryService } from '@xmcl/runtime/limyrx'
 import { ProjectMappingService } from '@xmcl/runtime/moddb'
 import { ModMetadataService } from '@xmcl/runtime/moddb/ModMetadataService'
 import { BlueprintMarketService } from '@xmcl/runtime/market'
@@ -63,6 +63,7 @@ export const definedServices = [
   LaunchService,
   ModpackService,
   LimyrxClientService,
+  TelemetryService,
   InstanceServerInfoService,
   ResourcePackPreviewService,
   InstanceManifestService,

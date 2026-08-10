@@ -196,6 +196,10 @@ export function useSettings() {
     get: () => state.value?.disableTelemetry ?? false,
     set: v => state.value?.disableTelemetrySet(v),
   })
+  const enableLimyrxMetrics = computed({
+    get: () => state.value?.enableLimyrxMetrics ?? false,
+    set: v => state.value?.enableLimyrxMetricsSet(v),
+  })
   const enableDiscord = computed({
     get: () => state.value?.discordPresence ?? false,
     set: (v) => state.value?.discordPresenceSet(v),
@@ -246,6 +250,7 @@ export function useSettings() {
     apiSetsPreference,
     apiSets,
     disableTelemetry,
+    enableLimyrxMetrics,
     error,
     isValidating,
   }

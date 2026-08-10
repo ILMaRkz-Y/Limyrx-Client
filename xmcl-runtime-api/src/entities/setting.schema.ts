@@ -87,6 +87,8 @@ export const SettingSchema = z.object({
   developerMode: z.boolean().catch(false),
   /** Disable telemetry setting */
   disableTelemetry: z.boolean().catch(false),
+  /** Opt-in consent for the Limyrx stats dashboard */
+  enableLimyrxMetrics: z.boolean().catch(false),
   /** Linux titlebar setting */
   linuxTitlebar: z.boolean().catch(false),
   /** Enable dedicated GPU optimization */
