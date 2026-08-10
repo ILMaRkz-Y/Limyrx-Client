@@ -1,0 +1,5 @@
+# Reverse proxy + TLS. Replace api.limyrx.online with your real domain
+# (and point the domain's A/AAAA records at the VPS first).
+api.limyrx.online {
+    reverse_proxy api:3000
+}

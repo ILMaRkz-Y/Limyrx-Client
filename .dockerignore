@@ -1,0 +1,7 @@
+node_modules
+**/node_modules
+**/dist
+!limyrx-api/dist
+.git
+e2e
+*.log
