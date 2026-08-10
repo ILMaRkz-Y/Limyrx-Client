@@ -79,7 +79,12 @@ export async function getTimeseries(range: '24h' | '7d' | '30d' = '24h'): Promis
         { $match: { at: { $gte: since } } },
         {
             $group: {
-                _id: { $subtract: ['$at', { $mod: [{ $subtract: ['$at', since.getTime()] }, bucketMs] }] },
+                _id: {
+                    $subtract: [
+                        { $toLong: '$at' },
+                        { $mod: [{ $subtract: [{ $toLong: '$at' }, since.getTime()] }, bucketMs] },
+                    ],
+                },
                 devices: { $addToSet: '$deviceId' },
                 events: { $sum: 1 },
             },
