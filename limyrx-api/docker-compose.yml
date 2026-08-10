@@ -4,9 +4,12 @@ services:
     restart: unless-stopped
     volumes:
       - mongo-data:/data/db
+      - ./mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-limyrx}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?set MONGO_ROOT_PASSWORD in .env}
+      MONGO_APP_USER: ${MONGO_APP_USER:-limyrx}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:?set MONGO_APP_PASSWORD in .env}
     healthcheck:
       test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.runCommand("ping").ok']
       interval: 10s
