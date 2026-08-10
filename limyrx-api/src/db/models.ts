@@ -12,6 +12,8 @@ const deviceSchema = new mongoose.Schema(
         launcherVersion: { type: String },
         os: { type: String },
         country: { type: String },
+        /** Set once the first-install Discord webhook has been fired for this device. */
+        installNotified: { type: Boolean, default: false },
     },
     { timestamps: false },
 )

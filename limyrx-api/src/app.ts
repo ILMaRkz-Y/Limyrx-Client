@@ -6,6 +6,7 @@ import { adminRoutes } from './routes/admin'
 import { authRoutes } from './routes/auth'
 import { eventRoutes } from './routes/events'
 import { heartbeatRoutes } from './routes/heartbeat'
+import { installRoutes } from './routes/install'
 import { publicRoutes } from './routes/public'
 
 /**
@@ -23,6 +24,7 @@ export async function createApp(): Promise<FastifyInstance> {
     await app.register(publicRoutes, { prefix: '/api/v1' })
     await app.register(authRoutes, { prefix: '/api/v1' })
     await app.register(heartbeatRoutes, { prefix: '/api/v1' })
+    await app.register(installRoutes, { prefix: '/api/v1' })
     await app.register(eventRoutes, { prefix: '/api/v1' })
     await app.register(adminRoutes, { prefix: '/api/v1/admin' })
 

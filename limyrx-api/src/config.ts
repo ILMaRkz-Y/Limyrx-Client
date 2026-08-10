@@ -21,6 +21,8 @@ export interface Config {
     githubCacheMs: number
     /** Origin allowed by CORS (launcher + dashboard). '*' allows all. */
     corsOrigin: string
+    /** Discord webhook URL for new-install notifications. Optional. */
+    discordWebhookUrl: string | undefined
 }
 
 function intEnv(name: string, fallback: number): number {
@@ -40,4 +42,5 @@ export const config: Config = {
     onlineWindowMs: intEnv('ONLINE_WINDOW_MS', 2 * 60 * 1000),
     githubCacheMs: intEnv('GITHUB_CACHE_MS', 5 * 60 * 1000),
     corsOrigin: process.env.CORS_ORIGIN ?? '*',
+    discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL,
 }

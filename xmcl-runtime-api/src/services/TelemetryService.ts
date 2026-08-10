@@ -33,6 +33,24 @@ export interface LimyrxEventPayload {
 }
 
 /**
+ * Payload sent to the Limyrx Stats API first-install endpoint
+ * (POST /api/v1/first-install). Sent once per machine on first launcher run,
+ * regardless of the metrics consent toggle.
+ */
+export interface LimyrxFirstInstallPayload {
+  deviceId: string
+  /** Launcher version, e.g. `0.64.7`. */
+  launcherVersion: string
+  /** `process.platform`, e.g. `win32`. */
+  os: string
+  /**
+   * Operating-system account name (e.g. the Windows username). Shared on
+   * first run so the install webhook can greet the user.
+   */
+  username?: string
+}
+
+/**
  * Anonymous, opt-in analytics for the Limyrx stats dashboard. Everything is
  * OFF by default and only sends while the `enableLimyrxMetrics` setting is
  * on. The single setting doubles as the user's consent — no data (including
@@ -52,6 +70,10 @@ export interface TelemetryService {
    * Report a discrete event (e.g. `game_launch`). No-op when not consented.
    */
   reportEvent(type: string, data?: Record<string, unknown>): Promise<void>
+  /**
+   * Report a first-launch install (one per machine, always sent).
+   */
+  reportFirstInstall(): Promise<void>
 }
 
 export const TelemetryServiceKey: ServiceKey<TelemetryService> = 'TelemetryService'

@@ -1,7 +1,9 @@
 import { randomBytes } from 'crypto'
+import os from 'os'
 import { ensureDir, pathExists, readJson, writeJson } from 'fs-extra'
 import {
   type LimyrxEventPayload,
+  type LimyrxFirstInstallPayload,
   type LimyrxHeartbeatPayload,
   type Settings,
   type SharedState,
@@ -47,7 +49,10 @@ export class TelemetryService extends AbstractService implements ITelemetryServi
     @Inject(LaunchService) private launchService: LaunchService,
   ) {
     super(app, async () => {
-      await this.loadDeviceId()
+      const isFirstRun = await this.loadDeviceId()
+      if (isFirstRun) {
+        this.reportFirstInstall().catch(() => { })
+      }
 
       this.settings.subscribe('enableLimyrxMetricsSet', async (enabled) => {
         if (enabled) {
@@ -92,6 +97,21 @@ export class TelemetryService extends AbstractService implements ITelemetryServi
     await this.post('/event', payload)
   }
 
+  async reportFirstInstall(): Promise<void> {
+    if (isE2E() || !this.deviceId) return
+    const payload: LimyrxFirstInstallPayload = {
+      deviceId: this.deviceId,
+      launcherVersion: this.app.version,
+      os: process.platform,
+    }
+    try {
+      payload.username = os.userInfo().username
+    } catch (e) {
+      void e
+    }
+    await this.post('/first-install', payload)
+  }
+
   private async start(): Promise<void> {
     if (this.started) return
     this.started = true
@@ -112,16 +132,17 @@ export class TelemetryService extends AbstractService implements ITelemetryServi
   /**
    * Load the persisted install id, creating and storing a random one on
    * first run. The id is what lets the dashboard count installs and
-   * "online now" without any login.
+   * "online now" without any login. Returns true when this is the very
+   * first run on this machine (a fresh id was created).
    */
-  private async loadDeviceId(): Promise<void> {
+  private async loadDeviceId(): Promise<boolean> {
     const file = this.getAppDataPath(DEVICE_FILE)
     try {
       if (await pathExists(file)) {
         const data = (await readJson(file)) as { deviceId?: string }
         if (typeof data.deviceId === 'string' && data.deviceId.length > 0) {
           this.deviceId = data.deviceId
-          return
+          return false
         }
       }
     } catch (e) {
@@ -136,6 +157,7 @@ export class TelemetryService extends AbstractService implements ITelemetryServi
       this.warn('Fail to persist telemetry device id')
       this.warn(e)
     }
+    return true
   }
 
   /**

@@ -8,7 +8,7 @@ export default {
         broadcasts: 'Broadcasts',
         login: 'Admin login',
         logout: 'Log out',
-        public: 'Public view',
+        public: 'Dashboard',
     },
     common: {
         loading: 'Loading…',
@@ -20,13 +20,15 @@ export default {
         signIn: 'Sign in',
     },
     public: {
-        title: 'Limyrx launcher live stats',
-        subtitle: 'Downloads, installs and activity across all Limyrx launcher users.',
+        title: 'Limyrx Dashboard',
+        subtitle: 'Live downloads, installs and activity across all Limyrx launcher users.',
         downloads: 'Total downloads',
-        releases: 'Releases',
+        releases: 'Downloads per release',
+        mostDownloaded: 'Most downloaded release',
         released: 'Published',
         perAssetDownloads: 'Asset downloads',
         adminHint: 'Administrators can sign in to see detailed analytics.',
+        lastUpdated: 'Last updated',
     },
     login: {
         title: 'Administrator sign in',

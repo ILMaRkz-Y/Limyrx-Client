@@ -8,7 +8,7 @@ export default {
         broadcasts: '公告',
         login: '管理员登录',
         logout: '退出登录',
-        public: '公开视图',
+        public: '仪表盘',
     },
     common: {
         loading: '加载中…',
@@ -20,13 +20,15 @@ export default {
         signIn: '登录',
     },
     public: {
-        title: 'Limyrx 启动器实时统计',
-        subtitle: '所有 Limyrx 启动器用户的下载、安装与活跃数据。',
+        title: 'Limyrx 仪表盘',
+        subtitle: '所有 Limyrx 启动器用户的下载、安装与活跃实时数据。',
         downloads: '总下载量',
-        releases: '版本发布',
+        releases: '各版本下载量',
+        mostDownloaded: '下载最多的版本',
         released: '发布于',
         perAssetDownloads: '文件下载量',
         adminHint: '管理员可登录查看详细分析。',
+        lastUpdated: '最后更新',
     },
     login: {
         title: '管理员登录',
