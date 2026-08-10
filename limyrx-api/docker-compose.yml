@@ -30,6 +30,11 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
     ports:
       - '127.0.0.1:3000:3000'
+    networks:
+      default:
+      chatstack:
+        aliases:
+          - api
     depends_on:
       mongo:
         condition: service_healthy
@@ -56,3 +61,8 @@ volumes:
   mongo-data:
   caddy-data:
   caddy-config:
+
+networks:
+  chatstack:
+    external: true
+    name: chat-stack_default
