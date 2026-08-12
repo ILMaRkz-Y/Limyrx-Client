@@ -241,7 +241,20 @@ deploys to Vercel (`deploy-ui.yml`).
 Releases flow from a `chore(release)` commit: draft release → AppX signing → asset mirroring + npm
 publish of the `@xmcl/app-*` asar bundles.
 
+## Credits
+
+Limyrx Client is based on [**XMCL**](https://github.com/Voxelum/x-minecraft-launcher) by
+[**ci010 / Voxelum**](https://github.com/Voxelum), an open-source Minecraft launcher
+distributed under the [MIT License](https://github.com/Voxelum/x-minecraft-launcher/blob/master/LICENSE).
+Substantial portions of the code (the `@xmcl/*` packages, `xmcl-runtime`,
+`xmcl-keystone-ui` and related infrastructure) originate from that project and retain the
+original MIT copyright notice, which is reproduced in [LICENSE.md](LICENSE.md).
+
+Limyrx Client is an independent project and is not affiliated with, endorsed by, or sponsored by
+XMCL, Voxelum, or ci010.
+
 ## License
 
 Limyrx Client is distributed under a custom non-commercial license. Redistribution, commercial use
-and modification are restricted — see [LICENSE.md](LICENSE.md) for the full terms.
+and modification are restricted — see [LICENSE.md](LICENSE.md) for the full terms. Portions derived
+from XMCL remain under the MIT License (Copyright (c) 2023 ci010).
