@@ -82,7 +82,8 @@ need to play and mod Minecraft, in one fast, modern application.
 - **Command palette** — Ctrl+K-style command palette for quick navigation.
 - **In-app AI assistant** — an integrated AI agent chat that can navigate the launcher and help you.
 - **First-run tutorial** — an interactive walkthrough built with driver.js.
-- **Gamepad / Steam Deck support** — navigate the launcher with a controller.
+- **Gamepad / Steam Deck support** — navigate the launcher with a controller; install and play on
+  Steam Deck and other portable handhelds.
 - **Playtime tracking** — per-account/instance playtime and last-played records.
 - **Splash video, audio player and typing effects** — polish throughout the UI.
 - **Discord Rich Presence** — show what you are playing in your Discord status.
