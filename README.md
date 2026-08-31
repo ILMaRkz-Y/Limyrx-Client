@@ -244,18 +244,21 @@ publish of the `@xmcl/app-*` asar bundles.
 
 ## Credits
 
-Limyrx Client is based on [**XMCL**](https://github.com/Voxelum/x-minecraft-launcher) by
-[**ci010 / Voxelum**](https://github.com/Voxelum), an open-source Minecraft launcher
-distributed under the [MIT License](https://github.com/Voxelum/x-minecraft-launcher/blob/master/LICENSE).
-Substantial portions of the code (the `@xmcl/*` packages, `xmcl-runtime`,
-`xmcl-keystone-ui` and related infrastructure) originate from that project and retain the
-original MIT copyright notice, which is reproduced in [LICENSE.md](LICENSE.md).
+Limyrx Client is based on [**XMCL**](https://github.com/Voxelum/x-minecraft-launcher) by [**ci010 / Voxelum**](https://github.com/Voxelum), an open-source Minecraft launcher distributed under the [MIT License](https://github.com/Voxelum/x-minecraft-launcher/blob/master/LICENSE).
 
-Limyrx Client is an independent project and is not affiliated with, endorsed by, or sponsored by
-XMCL, Voxelum, or ci010.
+Substantial portions of Limyrx Client are derived from XMCL, including the `@xmcl/*` packages, `xmcl-runtime`, `xmcl-keystone-ui`, and related infrastructure. These portions remain licensed under the original MIT License and retain the applicable copyright and license notices.
+
+Limyrx Client also contains original code, modifications, features, UI work, assets, and other contributions created specifically for Limyrx. These original Limyrx contributions are subject to the terms specified in [LICENSE.md](LICENSE.md), except where a different license applies.
+
+Limyrx Client is an independent project and is not affiliated with, endorsed by, or sponsored by XMCL, Voxelum, or ci010.
 
 ## License
 
-Limyrx Client is distributed under a custom non-commercial license. Redistribution, commercial use
-and modification are restricted — see [LICENSE.md](LICENSE.md) for the full terms. Portions derived
-from XMCL remain under the MIT License (Copyright (c) 2023 ci010).
+Limyrx Client contains both XMCL-derived code and original Limyrx work.
+
+* **XMCL-derived code:** MIT License — Copyright (c) 2023 ci010 and the respective original contributors.
+* **Original Limyrx code and assets:** Subject to the Limyrx license specified in [LICENSE.md](LICENSE.md).
+* **Third-party dependencies:** Remain under their respective licenses.
+
+Nothing in the Limyrx license is intended to restrict rights granted by the MIT License for XMCL-derived code.
+
